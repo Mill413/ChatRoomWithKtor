@@ -4,6 +4,7 @@ import io.ktor.http.cio.websocket.*
 import io.ktor.websocket.*
 import top.harumill.top.harumill.contact.User
 import top.harumill.top.harumill.message.Message
+import top.harumill.top.harumill.message.MessageChain
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
@@ -19,6 +20,10 @@ class Client(private val session:Session): User() {
 
     override suspend fun sendMessage(message: Message) {
         session.send(objectToByte(message)!!)
+    }
+
+    override suspend fun sendMessage(messageChain: MessageChain) {
+        session.send(objectToByte(messageChain)!!)
     }
 
     suspend fun sendMessage(message: String){

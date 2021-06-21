@@ -13,9 +13,8 @@ import io.ktor.client.features.websocket.WebSockets
 import io.ktor.http.cio.websocket.Frame
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.*
-import top.harumill.top.harumill.message.Message
-import top.harumill.top.harumill.message.MessageType
-import top.harumill.top.harumill.message.PlainText
+import top.harumill.top.harumill.message.*
+import java.io.File
 import java.util.*
 
 object WsClientApp {
@@ -34,11 +33,17 @@ object WsClientApp {
                 path = "/echo"
             ) {
                 launch {
-                    while (true){
-                        val text = scanner.nextLine()
-                        val frameSend = objectToByte(PlainText(text))
-                        send(frameSend!!)
-                    }
+//                    while (true){
+//                        val text = scanner.nextLine()
+//                        val text2 = scanner.nextLine()
+//                        val msg = PlainText(text)+PlainText(text2)
+//                        val frameSend = objectToByte(msg)
+//                        send(frameSend!!)
+//                    }
+                    val file  = File("data/a.txt")
+                    val msg = FileMessage(file)
+                    val frame = objectToByte(msg)
+                    send(frame!!)
                 }
                 while (true){
                     when(val message = incoming.receive()){

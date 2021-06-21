@@ -1,6 +1,8 @@
 package top.harumill.top.harumill.message
 
 import java.io.Serializable
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 /**
  * 元消息接口，只包含最原始的消息内容,任何具体的消息类型不应直接实现此接口，而应继承[Message]类
@@ -12,7 +14,11 @@ import java.io.Serializable
  */
 interface MetaMessage:Serializable {
     val type:MessageType
-    val sourceID:Long
+    val sourceID: Long
+        get() = sendTime
+
+    private val sendTime: Long
+        get() = LocalDateTime.now().toInstant(ZoneOffset.of("+8")).toEpochMilli()
 }
 
 /**
@@ -22,5 +28,7 @@ interface MetaMessage:Serializable {
  */
 enum class MessageType {
     PLAINTEXT,
-    COMMAND
+    COMMAND,
+    MESSAGECHAIN,
+    FILE
 }

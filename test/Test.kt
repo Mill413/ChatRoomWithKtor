@@ -1,12 +1,10 @@
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
-import java.io.Serializable
+import top.harumill.top.harumill.message.FileMessage
+import java.io.*
 
 enum class Type{
     PLAIN,
-    IMAGE
+    IMAGE,
+    CHAIN
 }
 open class A(num:Int, type:Type):Serializable{
     val i = num
@@ -15,14 +13,26 @@ open class A(num:Int, type:Type):Serializable{
 class B(num: Int,type: Type):A(num,type){
     val extra = "hi"
 }
-fun main(){
-    val b = B(3,Type.PLAIN)
+class C(num: Int,type: Type):A(num,type){
+    val list = mutableListOf<A>()
+}
 
-    val bToByte = objectToByte(b)
-    val byteToObj = byteToObject(bToByte) as A
-    if (byteToObj.mytype == Type.PLAIN){
-        println((byteToObj as B).extra)
-    }
+fun main(){
+//    val c = C(2,Type.CHAIN)
+//    c.list.add(B(1,Type.IMAGE))
+//    c.list.add(A(2,Type.PLAIN))
+//
+//    val byte = objectToByte(c)
+//    val obj = byteToObject(byte) as A
+//    if (obj.mytype == Type.CHAIN){
+//        (obj as C).list.forEach {
+//            println(it.i)
+//        }
+//    }
+
+    val file  = File("data/a.txt")
+    val msg = FileMessage(file)
+    println(msg.fileSize)
 }
 fun objectToByte(obj: Any?): ByteArray? {
     var bytes: ByteArray? = null

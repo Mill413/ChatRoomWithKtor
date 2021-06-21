@@ -1,6 +1,7 @@
 package top.harumill.top.harumill.contact
 
 import top.harumill.top.harumill.message.Message
+import top.harumill.top.harumill.message.MessageChain
 import java.io.Serializable
 
 /**
@@ -16,4 +17,6 @@ interface Contact:Serializable {
      * 发送消息方法
      */
     suspend fun sendMessage(message:Message)
+
+    suspend fun sendMessage(messageChain: MessageChain)
 }
