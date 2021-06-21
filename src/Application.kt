@@ -8,7 +8,6 @@ import io.ktor.routing.*
 import io.ktor.util.*
 import io.ktor.websocket.*
 import top.harumill.contact.server.Client
-import top.harumill.contact.server.byteToObject
 import top.harumill.top.harumill.contact.server.ClientPool
 import top.harumill.top.harumill.message.*
 import top.harumill.top.harumill.utils.Logger
@@ -23,8 +22,7 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
 @OptIn(InternalAPI::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @Suppress("unused") // Referenced in application.conf
-@kotlin.jvm.JvmOverloads
-fun Application.module(testing: Boolean = false) {
+fun Application.module() {
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(15)
         timeout = Duration.ofSeconds(15)
@@ -33,8 +31,6 @@ fun Application.module(testing: Boolean = false) {
     }
 
     routing {
-//        val clients = ConcurrentHashMap<UserID,Member>()
-//        val clientsSet = ConcurrentSet<Member>()
 
 
         get("/") {
@@ -58,25 +54,24 @@ fun Application.module(testing: Boolean = false) {
                         }
                         is Frame.Text -> {
                             val rawMessage = frame.readText()
-                            Logger.verbose(rawMessage)
+                            Logger.verbose("Get message from $newClient: $rawMessage")
                             newClient.sendMessage(rawMessage)
                         }
                         is Frame.Binary -> {
                             val rawMessage = byteToObject(frame.readBytes()) as Message
                             when(rawMessage.type){
                                 MessageType.PLAINTEXT -> {
+                                    Logger.verbose("Get message from $newClient: $rawMessage")
                                     newClient.sendMessage(rawMessage as PlainText)
                                 }
                                 MessageType.MESSAGECHAIN -> {
                                     val chain=rawMessage as MessageChain
-                                    chain.forEach {
-                                        println(it)
-                                    }
+                                    Logger.verbose("Get message from $newClient: $chain")
                                 }
                                 MessageType.FILE -> {
                                     val file = rawMessage as FileMessage
                                     file.saveFileTo("data/b.txt")
-                                    println(file.fileSize)
+                                    Logger.verbose("Get message from $newClient: $file")
                                 }
                                 else -> {}
                             }

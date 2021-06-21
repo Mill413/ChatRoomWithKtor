@@ -9,8 +9,11 @@ import top.harumill.top.harumill.contact.Contact
  */
 class PlainText(text: String): Message {
     override val type: MessageType = MessageType.PLAINTEXT
-
     val content:String = text
+
+    override fun contentToString(): String {
+        return content
+    }
 
     override fun toString(): String {
         return content

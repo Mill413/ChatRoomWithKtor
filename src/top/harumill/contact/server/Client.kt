@@ -5,6 +5,7 @@ import io.ktor.websocket.*
 import top.harumill.top.harumill.contact.User
 import top.harumill.top.harumill.message.Message
 import top.harumill.top.harumill.message.MessageChain
+import top.harumill.top.harumill.message.objectToByte
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
@@ -35,35 +36,3 @@ class Client(private val session:Session): User() {
     }
 }
 
-fun objectToByte(obj: Any?): ByteArray? {
-    var bytes: ByteArray? = null
-    try {
-        // object to bytearray
-        val bo = ByteArrayOutputStream()
-        val oo = ObjectOutputStream(bo)
-        oo.writeObject(obj)
-        bytes = bo.toByteArray()
-        bo.close()
-        oo.close()
-    } catch (e: Exception) {
-        println("translation" + e.message)
-        e.printStackTrace()
-    }
-    return bytes
-}
-
-fun byteToObject(bytes: ByteArray?): Any? {
-    var obj: Any? = null
-    try {
-        // bytearray to object
-        val bi = ByteArrayInputStream(bytes)
-        val oi = ObjectInputStream(bi)
-        obj = oi.readObject()
-        bi.close()
-        oi.close()
-    } catch (e: java.lang.Exception) {
-        println("translation" + e.message)
-        e.printStackTrace()
-    }
-    return obj
-}

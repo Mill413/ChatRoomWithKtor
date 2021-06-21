@@ -8,7 +8,6 @@ class MessageChain(message: MessageChain?=null) : Message,List<Message>{
 
     override val size = messageList.size
 
-
     init {
         if (message != null) {
             messageList.addAll(message.messageList)
@@ -19,6 +18,21 @@ class MessageChain(message: MessageChain?=null) : Message,List<Message>{
         messageList.add(singleMessage)
     }
 
+    override fun contentToString(): String {
+        var content = ""
+        this.forEach{
+            content += it.contentToString()
+        }
+        return content
+    }
+
+    override fun toString(): String {
+        var content = ""
+        this.forEach{
+            content += it.toString()
+        }
+        return content
+    }
     operator fun plus(message:MessageChain):MessageChain{
         messageList.addAll(message.messageList)
         return this

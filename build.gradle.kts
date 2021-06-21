@@ -1,6 +1,6 @@
 val ktorVersion: String = "1.6.0"
 val kotlinVersion: String = "1.4.30"
-val logback_version: String by project
+val logbackVersion: String = "1.2.1"
 
 plugins {
     application
@@ -27,7 +27,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
 
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-websockets:$ktorVersion")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
