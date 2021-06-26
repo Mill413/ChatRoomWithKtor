@@ -1,27 +1,21 @@
-import io.ktor.application.*
-import io.ktor.response.*
-import io.ktor.request.*
-import io.ktor.routing.*
-import io.ktor.http.*
-import io.ktor.websocket.*
-import io.ktor.http.cio.websocket.*
-import java.time.*
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.features.websocket.*
-import io.ktor.client.features.websocket.WebSockets
-import io.ktor.http.cio.websocket.Frame
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.*
-import top.harumill.top.harumill.message.*
-import top.harumill.top.harumill.message.command.Command
-import top.harumill.top.harumill.utils.Logger
+import io.ktor.http.*
+import io.ktor.http.cio.websocket.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import top.harumill.message.*
+import top.harumill.top.harumill.message.singleMessage.FileMessage
+import top.harumill.top.harumill.message.singleMessage.PlainText
+import top.harumill.utils.Logger
 import java.io.File
 import java.util.*
 
 val scanner = Scanner(System.`in`)
 
 object WsClientApp {
+
     @JvmStatic
     fun main(args: Array<String>) {
 
@@ -37,17 +31,15 @@ object WsClientApp {
                 path = "/echo"
             ) {
                 val session = this
-                launch {
-                    sendMessage(session)
-                }
+                launch { sendMessage(session) }
                 receiveMessage(session)
-
             }
         }
     }
 }
 
 suspend fun sendMessage(session: DefaultClientWebSocketSession) {
+
     while (true) {
         var msg: Message
         println("""
@@ -55,7 +47,8 @@ suspend fun sendMessage(session: DefaultClientWebSocketSession) {
             1.文本消息
             2.文件消息
         """.trimIndent())
-        val type = (1..2).random()
+//        val type = (1..2).random()
+        val type = readLine()!!.toInt()
         println("接下来请输入消息内容:")
         when (type) {
             1 -> {
@@ -84,7 +77,7 @@ suspend fun receiveMessage(session: DefaultClientWebSocketSession) {
                 Logger.verbose("Get message from server: ${message.readText()}")
             }
             is Frame.Binary -> {
-                val msg = top.harumill.top.harumill.message.byteToObject(message.data) as Message
+                val msg = byteToObject(message.data) as Message
                 when (msg.type) {
                     MessageType.PLAINTEXT -> {
                         Logger.verbose((msg as PlainText).contentToString())
@@ -95,9 +88,8 @@ suspend fun receiveMessage(session: DefaultClientWebSocketSession) {
                     MessageType.MESSAGECHAIN -> {
                         Logger.verbose((msg as MessageChain).contentToString())
                     }
-                    MessageType.COMMAND -> {
-                        Logger.verbose((msg as Command).contentToString())
-                    }
+
+                    else -> {}
                 }
             }
         }

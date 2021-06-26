@@ -38,6 +38,9 @@ dependencies {
 
     implementation("org.xerial", "sqlite-jdbc", "3.8.11.2")
 
+    implementation("org.jline","jline","3.20.0")
+
+
 }
 
 kotlin.sourceSets["main"].kotlin.srcDirs("src")

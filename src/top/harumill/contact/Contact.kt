@@ -1,11 +1,12 @@
-package top.harumill.top.harumill.contact
+package top.harumill.contact
 
-import top.harumill.top.harumill.message.Message
-import top.harumill.top.harumill.message.MessageChain
+import top.harumill.message.ForwardMessage
+import top.harumill.message.Message
+import top.harumill.message.MessageChain
 import java.io.Serializable
 
 /**
- * 服务器端用户或者群组的公共接口
+ * 用户或群组的公共接口
  * @property id 用户或者群组的id,用于在数据库中的索引及唯一标识符
  * @property name 用户或者群组的名称
  */
@@ -19,4 +20,6 @@ interface Contact:Serializable {
     suspend fun sendMessage(message:Message)
 
     suspend fun sendMessage(messageChain: MessageChain)
+    
+    suspend fun sendMessage(forwardMessage:ForwardMessage)
 }

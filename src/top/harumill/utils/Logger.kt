@@ -1,4 +1,4 @@
-package top.harumill.top.harumill.utils
+package top.harumill.utils
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

@@ -1,6 +1,9 @@
-package top.harumill.top.harumill.message
+package top.harumill.message
 
 class MessageChain(message: MessageChain?=null) : Message,List<Message>{
+    companion object{
+        const val serialVersionUID:Long = 23
+    }
 
     override val type: MessageType = MessageType.MESSAGECHAIN
 

@@ -1,8 +1,8 @@
-package top.harumill.top.harumill.contact.server
+package top.harumill.contact.server
 
 import top.harumill.contact.server.Client
 import top.harumill.contact.server.Session
-import top.harumill.top.harumill.message.Message
+import top.harumill.message.Message
 import java.util.concurrent.ConcurrentHashMap
 
 typealias UserID = Long

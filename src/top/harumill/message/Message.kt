@@ -1,6 +1,6 @@
-package top.harumill.top.harumill.message
+package top.harumill.message
 
-import top.harumill.top.harumill.contact.Contact
+import top.harumill.contact.Contact
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
@@ -18,7 +18,6 @@ import java.time.ZoneOffset
  *
  */
 interface Message:Serializable {
-    val type:MessageType
     val sourceID: Long
         get() = sendTime
 
@@ -26,6 +25,7 @@ interface Message:Serializable {
         var sendTime: Long  = LocalDateTime.now().toInstant(ZoneOffset.of("+8")).toEpochMilli()
     }
 
+    val type:MessageType
 
     /**
      * 消息发送
@@ -36,17 +36,7 @@ interface Message:Serializable {
         sendTime = LocalDateTime.now().toInstant(ZoneOffset.of("+8")).toEpochMilli()
     }
 
-    /**
-     * 将一个单一类型消息转化为消息链
-     */
-    fun toMessageChain():MessageChain{
-        return MessageChain(this)
-    }
 
-    operator fun plus(message: Message):MessageChain{
-        val chain = MessageChain(this)
-        return chain.add(message)
-    }
 
     /**
      * 用于将消息转化为客户端显示
@@ -102,11 +92,12 @@ fun byteToObject(bytes: ByteArray?): Any? {
 /**
  * 数据类型
  * @property PLAINTEXT 文本消息，如 ”Hello“
- * @property COMMAND 指令消息，客户端向服务器发送的特定指令
+ *
  */
 enum class MessageType {
     PLAINTEXT,
-    COMMAND,
+    LOGIN_CMD,
     MESSAGECHAIN,
-    FILE
+    FILE,
+    FORWARD
 }

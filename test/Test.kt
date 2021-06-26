@@ -1,68 +1,74 @@
-import top.harumill.top.harumill.message.FileMessage
-import java.io.*
+import kotlinx.coroutines.CancellableContinuation
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.suspendCancellableCoroutine
+import org.jline.reader.EndOfFileException
+import org.jline.reader.LineReader
+import org.jline.reader.LineReaderBuilder
+import org.jline.reader.impl.history.DefaultHistory
+import org.jline.terminal.TerminalBuilder
+import java.util.concurrent.Executors
+import kotlin.coroutines.resumeWithException
 
-enum class Type{
-    PLAIN,
-    IMAGE,
-    CHAIN
-}
-open class A(num:Int, type:Type):Serializable{
-    val i = num
-    val mytype = type
-}
-class B(num: Int,type: Type):A(num,type){
-    val extra = "hi"
-}
-class C(num: Int,type: Type):A(num,type){
-    val list = mutableListOf<A>()
-}
+fun main(): Unit = runBlocking{
+    val terminal = TerminalBuilder.builder().system(true).build()
+    val lineReader = LineReaderBuilder
+        .builder()
+        .appName("Getto Chatroom")
+        .terminal(terminal)
+        .history(DefaultHistory())
+        .build()
 
-fun main(){
-//    val c = C(2,Type.CHAIN)
-//    c.list.add(B(1,Type.IMAGE))
-//    c.list.add(A(2,Type.PLAIN))
-//
-//    val byte = objectToByte(c)
-//    val obj = byteToObject(byte) as A
-//    if (obj.mytype == Type.CHAIN){
-//        (obj as C).list.forEach {
-//            println(it.i)
-//        }
-//    }
+    val prompt = "Getto>"
 
-    val file  = File("data/a.txt")
-    val msg = FileMessage(file)
-    println(msg.fileSize)
-}
-fun objectToByte(obj: Any?): ByteArray? {
-    var bytes: ByteArray? = null
-    try {
-        // object to bytearray
-        val bo = ByteArrayOutputStream()
-        val oo = ObjectOutputStream(bo)
-        oo.writeObject(obj)
-        bytes = bo.toByteArray()
-        bo.close()
-        oo.close()
-    } catch (e: Exception) {
-        println("translation" + e.message)
-        e.printStackTrace()
+    val lineList = mutableListOf<String>()
+    var line = ""
+
+    launch {
+        repeat(1000){i ->
+            println(i.toString())
+        }
     }
-    return bytes
+
+    while (true){
+        Input.requestInput("Getto",lineReader)
+    }
+
 }
 
-fun byteToObject(bytes: ByteArray?): Any? {
-    var obj: Any? = null
-    try {
-        // bytearray to object
-        val bi = ByteArrayInputStream(bytes)
-        val oi = ObjectInputStream(bi)
-        obj = oi.readObject()
-        bi.close()
-        oi.close()
-    } catch (e: java.lang.Exception) {
-        println("translation" + e.message)
-        e.printStackTrace()
+object Input{
+    val thread = Executors.newSingleThreadExecutor { task ->
+        Thread(task, "Mirai Console Input Thread").also {
+            it.isDaemon = false
+        }
     }
-    return obj
+
+    var executingCoroutine: CancellableContinuation<String>? = null
+
+    suspend fun requestInput(hint: String,lineReader:LineReader): String {
+        return suspendCancellableCoroutine { coroutine ->
+            if (thread.isShutdown || thread.isTerminated) {
+                coroutine.resumeWithException(EndOfFileException())
+                return@suspendCancellableCoroutine
+            }
+            executingCoroutine = coroutine
+            runCatching {
+                thread.submit {
+                    runCatching {
+                        lineReader.readLine(
+                            if (hint.isNotEmpty()) {
+                                "$hint > "
+                            } else "> "
+                        )
+                    }.let { result ->
+                        executingCoroutine = null
+                        coroutine.resumeWith(result)
+                    }
+                }
+            }.onFailure { error ->
+                executingCoroutine = null
+                runCatching { coroutine.resumeWithException(EndOfFileException(error)) }
+            }
+        }
+    }
 }
