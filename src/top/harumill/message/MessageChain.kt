@@ -1,11 +1,9 @@
 package top.harumill.message
 
-class MessageChain(message: MessageChain?=null) : Message,List<Message>{
-    companion object{
-        const val serialVersionUID:Long = 23
+class MessageChain(message: MessageChain? = null) : Message, List<Message> {
+    companion object {
+        const val serialVersionUID: Long = 23
     }
-
-    override val type: MessageType = MessageType.MESSAGECHAIN
 
     private val messageList = mutableListOf<Message>()
 
@@ -17,13 +15,13 @@ class MessageChain(message: MessageChain?=null) : Message,List<Message>{
         }
     }
 
-    constructor(singleMessage:Message) : this() {
+    constructor(singleMessage: Message) : this() {
         messageList.add(singleMessage)
     }
 
     override fun contentToString(): String {
         var content = ""
-        this.forEach{
+        this.forEach {
             content += it.contentToString()
         }
         return content
@@ -31,12 +29,13 @@ class MessageChain(message: MessageChain?=null) : Message,List<Message>{
 
     override fun toString(): String {
         var content = ""
-        this.forEach{
+        this.forEach {
             content += it.toString()
         }
         return content
     }
-    operator fun plus(message:MessageChain):MessageChain{
+
+    operator fun plus(message: MessageChain): MessageChain {
         messageList.addAll(message.messageList)
         return this
     }
@@ -83,7 +82,7 @@ class MessageChain(message: MessageChain?=null) : Message,List<Message>{
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): List<Message> {
-        return messageList.subList(fromIndex,toIndex)
+        return messageList.subList(fromIndex, toIndex)
     }
 
 

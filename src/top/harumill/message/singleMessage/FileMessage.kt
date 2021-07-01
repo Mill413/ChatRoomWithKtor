@@ -1,25 +1,21 @@
-package top.harumill.top.harumill.message.singleMessage
+package top.harumill.message.singleMessage
 
-import top.harumill.message.Message
-import top.harumill.message.MessageType
-import top.harumill.message.singleMessage.SingleMessage
 import java.io.File
 
-class FileMessage(resource: File?=null): SingleMessage {
-    companion object{
-        const val serialVersionUID:Long = 22
+class FileMessage(resource: File? = null) : SingleMessage {
+    companion object {
+        const val serialVersionUID: Long = 22
     }
-    override val type: MessageType = MessageType.FILE
 
 
-    private var file = resource
+    val file = resource
 
-    var fileType = if (file == null) "" else file!!.extension
+    var fileType = file?.extension ?: ""
 
-    var fileSize = if (file == null) 0 else file!!.length()
+    var fileSize = file?.length() ?: 0
 
-    fun saveFileTo(path:String){
-        if (file != null) file!!.copyTo(File(path),true)
+    fun saveFileTo(path: String): File? {
+        return file?.copyTo(File(path + file.name), true)
     }
 
     override fun toString(): String {

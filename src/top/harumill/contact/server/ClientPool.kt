@@ -1,25 +1,37 @@
 package top.harumill.contact.server
 
-import top.harumill.contact.server.Client
-import top.harumill.contact.server.Session
+import top.harumill.contact.UserInfo
 import top.harumill.message.Message
 import java.util.concurrent.ConcurrentHashMap
 
 typealias UserID = Long
+
 object ClientPool {
-    private val clientMap = ConcurrentHashMap<UserID,Client>()
+    private val clientMap = ConcurrentHashMap<UserID?, Client>()
 
-    fun joinClinet(newClient:Client){
-        clientMap[newClient.id] = newClient
+    fun queryClient(id: UserID): Client? {
+        return clientMap[id]
     }
 
-    fun deleteClient(client: Client){
-        clientMap.remove(client.id)
+    fun joinClinet(newClient: Client) {
+        clientMap[newClient.info.id] = newClient
     }
 
-    suspend fun broadcast(message:Message){
-        clientMap.forEach{
+    fun deleteClient(client: Client) {
+        clientMap.remove(client.info.id)
+    }
+
+    suspend fun broadcast(message: Message) {
+        clientMap.forEach {
             it.value.sendMessage(message)
         }
+    }
+
+    fun onlineList(): List<UserInfo> {
+        val list = mutableListOf<UserInfo>()
+        clientMap.forEach {
+            list.add(it.value.info)
+        }
+        return list.toList()
     }
 }

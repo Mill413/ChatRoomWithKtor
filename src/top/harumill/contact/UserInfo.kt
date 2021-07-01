@@ -1,26 +1,21 @@
-package top.harumill.top.harumill.contact
+package top.harumill.contact
 
-import top.harumill.contact.Contact
 import java.io.Serializable
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * 发送给客户端所需的用户信息
+ * 用户信息
+ *
+ * 可用于客户端与服务器收发用户信息
  */
 data class UserInfo(
-    val id:Long?,
-    val name:String = "Server"
-):Serializable{
+    var id: Long = 0L,
+    val name: String = if (id != 0L) "user-$id" else "Server"
+) : Serializable {
     companion object {
-        const val serialVersionUID:Long = 10
+        const val serialVersionUID: Long = 10
     }
 
-    constructor(contact:Contact?):this(
-        id = contact?.id,
-        name = contact?.name?:"Server"
-    )
-
     override fun toString(): String {
-        return "$name${if (id != null) "($id)" else ""}"
+        return "$name${"($id)"}"
     }
 }

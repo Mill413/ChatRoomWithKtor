@@ -5,23 +5,24 @@ import java.time.format.DateTimeFormatter
 
 object Logger {
 
-    private fun ouput(identifier:String,msg:String){
+    private fun ouput(identifier: String, msg: String) {
         println("${formatter.format(LocalDateTime.now())} Getto/${identifier}: $msg")
     }
 
-    fun verbose(ver:String){
-        ouput("V",ver)
-    }
-    fun info(info:String){
-        ouput("I",info)
+    fun verbose(ver: String) {
+        ouput("V", ver)
     }
 
-    fun warn(warning:String){
-        ouput("W",warning)
+    fun info(info: String) {
+        ouput("I", info)
     }
 
-    fun err(error:String){
-        ouput("E",error)
+    fun warn(warning: String) {
+        ouput("W", warning)
+    }
+
+    fun err(error: String) {
+        ouput("E", error)
     }
 }
 

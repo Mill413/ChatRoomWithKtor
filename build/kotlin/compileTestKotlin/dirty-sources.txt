@@ -1,3 +1,0 @@
-I:\IDEAProjects\chatroom\test\ApplicationTest.kt
-I:\IDEAProjects\chatroom\test\WsClientApp.kt
-I:\IDEAProjects\chatroom\test\Test.kt

@@ -2,17 +2,15 @@ package top.harumill.message.singleMessage
 
 import top.harumill.message.Message
 import top.harumill.message.MessageChain
-import top.harumill.message.MessageType
 
 /**
- * 单一类型消息接口
+ * 单一类型消息接口，提供将单一类型消息转化为[MessageChain]的方法
+ *
+ * [toMessageChain] 将一个单一类型消息转化为消息链
+ *
  */
-interface SingleMessage:Message {
-    override val type: MessageType
+interface SingleMessage : Message {
 
-    /**
-     * 将一个单一类型消息转化为消息链
-     */
     fun toMessageChain(): MessageChain {
         return MessageChain(this)
     }
