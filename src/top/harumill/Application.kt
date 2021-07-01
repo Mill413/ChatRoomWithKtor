@@ -70,13 +70,7 @@ fun Application.module() {
                                             )
                                         )
                                     } else {
-                                        ClientPool.queryClient(target)?.sendMessage(
-                                            ForwardMessage(
-                                                message = rawMessage.content,
-                                                from = rawMessage.target,
-                                                to = rawMessage.sender
-                                            )
-                                        )
+                                        ClientPool.queryClient(target)?.sendMessage(rawMessage)
                                     }
 
                                 }

@@ -51,6 +51,6 @@ sourceSets["test"].resources.srcDirs("testresources")
 
 val compileKotlin: org.jetbrains.kotlin.gradle.tasks.KotlinCompile by tasks
 compileKotlin.kotlinOptions {
-    jvmTarget = "13"
+    jvmTarget = "1.8"
     freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
 }
