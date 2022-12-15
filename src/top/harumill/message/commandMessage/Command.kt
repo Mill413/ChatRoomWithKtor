@@ -8,8 +8,8 @@ import top.harumill.message.Message
 import top.harumill.message.objectToByte
 import top.harumill.utils.Logger
 
-interface CommandMessage : Message {
-
+//TODO-指令类型要重写
+interface Command : Message {
     val type: CommandTYPE
 
     /**
@@ -32,14 +32,11 @@ interface CommandMessage : Message {
         response(client.session)
     }
 
-
     override fun contentToString(): String {
         return "[getto:command: $type]"
     }
 
     override fun toString(): String
-
-
 }
 
 /**
@@ -48,5 +45,6 @@ interface CommandMessage : Message {
  */
 enum class CommandTYPE {
     LOGIN,
+    QUIT,
     SYNC
 }

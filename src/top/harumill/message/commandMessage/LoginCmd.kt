@@ -11,7 +11,7 @@ import top.harumill.contact.UserInfo
  */
 class LoginCmd(
     user: UserInfo
-) : CommandMessage {
+) : Command {
     companion object {
         const val serialVersionUID: Long = 24
     }

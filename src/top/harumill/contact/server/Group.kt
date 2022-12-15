@@ -2,7 +2,7 @@ package top.harumill.contact.server
 
 import top.harumill.contact.Contact
 import top.harumill.contact.UserInfo
-import top.harumill.message.ForwardMessage
+import top.harumill.message.simpleMessage.SimpleMessage
 import top.harumill.message.Message
 import top.harumill.message.MessageChain
 
@@ -27,9 +27,9 @@ class Group : Contact {
         }
     }
 
-    override suspend fun sendMessage(forwardMessage: ForwardMessage) {
+    override suspend fun sendMessage(simpleMessage: SimpleMessage) {
         memberList.forEach {
-            it.sendMessage(forwardMessage)
+            it.sendMessage(simpleMessage)
         }
     }
 

@@ -1,4 +1,4 @@
-package top.harumill.message.singleMessage
+package top.harumill.message.simpleMessage
 
 /**
  * 文本消息

@@ -1,4 +1,4 @@
-package top.harumill.message.singleMessage
+package top.harumill.message.simpleMessage
 
 import top.harumill.message.Message
 import top.harumill.message.MessageChain

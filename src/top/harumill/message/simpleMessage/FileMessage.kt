@@ -1,4 +1,4 @@
-package top.harumill.message.singleMessage
+package top.harumill.message.simpleMessage
 
 import java.io.File
 

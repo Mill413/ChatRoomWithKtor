@@ -10,12 +10,12 @@ import io.ktor.websocket.*
 import top.harumill.contact.UserInfo
 import top.harumill.contact.server.Client
 import top.harumill.contact.server.ClientPool
-import top.harumill.message.ForwardMessage
 import top.harumill.message.Message
 import top.harumill.message.byteToObject
-import top.harumill.message.commandMessage.CommandMessage
+import top.harumill.message.commandMessage.Command
 import top.harumill.message.commandMessage.LoginCmd
 import top.harumill.message.commandMessage.UpdateCmd
+import top.harumill.message.simpleMessage.SimpleMessage
 import top.harumill.utils.Logger
 import top.harumill.utils.UIDPool
 import java.time.Duration
@@ -58,22 +58,13 @@ fun Application.module() {
                         is Frame.Binary -> {
                             val rawMessage = byteToObject(frame.readBytes()) as Message
                             Logger.verbose(rawMessage.toString())
+
                             when (rawMessage) {
-                                is ForwardMessage -> {
+                                is SimpleMessage -> {
                                     val target = rawMessage.target.id
-                                    if (target == 0L) {
-                                        newClient.sendMessage(
-                                            ForwardMessage(
-                                                message = rawMessage.content,
-                                                from = rawMessage.target,
-                                                to = rawMessage.sender
-                                            )
-                                        )
-                                    } else {
-                                        ClientPool.queryClient(target)?.sendMessage(rawMessage)
-                                    }
+                                    ClientPool.queryClient(target)?.sendMessage(rawMessage)
                                 }
-                                is CommandMessage -> {
+                                is Command -> {
                                     when (rawMessage) {
                                         is LoginCmd -> {
                                             if (rawMessage.info.id == -1L) {
@@ -83,7 +74,7 @@ fun Application.module() {
                                             ClientPool.joinClient(newClient)
                                             Logger.verbose("$newClient 上线了")
 
-                                            val loginMsg = ForwardMessage(
+                                            val loginMsg = SimpleMessage(
                                                 "Hello ${newClient.info.name}!Welcome to Getto ChatRoom!",
                                                 UserInfo(0L),
                                                 newClient.info

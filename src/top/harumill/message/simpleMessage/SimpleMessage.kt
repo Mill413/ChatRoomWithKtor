@@ -1,15 +1,15 @@
-package top.harumill.message
+package top.harumill.message.simpleMessage
 
 import top.harumill.contact.UserInfo
-import top.harumill.message.singleMessage.PlainText
+import top.harumill.message.Message
 
-class ForwardMessage(message: Message, from: UserInfo, to: UserInfo) : Message {
+class SimpleMessage(message: Message, from: UserInfo, to: UserInfo) : Message {
     companion object {
         const val serialVersionUID: Long = 20
     }
 
-    var content = message
-    var sender = from
+    private var content = message
+    private var sender = from
     val target = to
 
     constructor(message: String, from: UserInfo, to: UserInfo) : this(PlainText(message), from, to)

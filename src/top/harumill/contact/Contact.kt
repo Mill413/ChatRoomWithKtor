@@ -1,6 +1,6 @@
 package top.harumill.contact
 
-import top.harumill.message.ForwardMessage
+import top.harumill.message.simpleMessage.SimpleMessage
 import top.harumill.message.Message
 import top.harumill.message.MessageChain
 
@@ -18,5 +18,5 @@ interface Contact {
 
     suspend fun sendMessage(messageChain: MessageChain)
 
-    suspend fun sendMessage(forwardMessage: ForwardMessage)
+    suspend fun sendMessage(simpleMessage: SimpleMessage)
 }
