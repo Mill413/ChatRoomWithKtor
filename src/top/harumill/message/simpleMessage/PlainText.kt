@@ -1,5 +1,7 @@
 package top.harumill.message.simpleMessage
 
+import top.harumill.message.SingleMessage
+
 /**
  * 文本消息
  * @property content 文本内容

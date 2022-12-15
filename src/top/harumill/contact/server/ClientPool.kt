@@ -21,6 +21,7 @@ object ClientPool {
         clientMap.remove(client.info.id)
     }
 
+    //TODO-协程
     suspend fun broadcast(message: Message) {
         clientMap.forEach {
             it.value.sendMessage(message)

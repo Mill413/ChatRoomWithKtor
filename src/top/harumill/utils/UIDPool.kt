@@ -1,10 +1,11 @@
 package top.harumill.utils
 
 object UIDPool {
-    private val uidPool = mutableListOf<Long>()
+    private val uidPool = mutableSetOf<Long>()
 
+    private const val MAX_SIZE = 1000
     init {
-        for (i in 1..1000) {
+        for (i in 1..MAX_SIZE) {
             uidPool.add(i.toLong())
         }
     }

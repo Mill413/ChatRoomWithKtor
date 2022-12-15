@@ -1,5 +1,6 @@
 package top.harumill.message.simpleMessage
 
+import top.harumill.message.SingleMessage
 import java.io.File
 
 class FileMessage(resource: File? = null) : SingleMessage {

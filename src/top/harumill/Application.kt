@@ -5,7 +5,6 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
-import io.ktor.util.*
 import io.ktor.websocket.*
 import top.harumill.contact.UserInfo
 import top.harumill.contact.server.Client
@@ -22,7 +21,6 @@ import java.time.Duration
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
-@Suppress("unused") // Referenced in application.conf
 fun Application.module() {
     install(WebSockets) {
         pingPeriod = Duration.ofSeconds(15)
@@ -33,12 +31,14 @@ fun Application.module() {
 
     routing {
         get("/") {
-            call.respondText("Hello!This is a testing Chatroom with WebSocket!", contentType = ContentType.Text.Plain)
+            call.respondText("Hello!This is a testing Chatroom with WebSocket!\n" +
+                    "If you can read this text,please get out :)", contentType = ContentType.Text.Plain)
         }
 
         webSocket("/echo") {
             val newUID = UIDPool.generateUID()
             val newClient = Client(this, newUID)
+            Logger.verbose("$newClient 上线了")
             send("Hello!This is a testing Chatroom with WebSocket!Your id is $newUID")
 
             try {
@@ -55,15 +55,38 @@ fun Application.module() {
                             send(rawMessage)
                         }
 
+                        else -> {}
+                    }
+                }
+            } catch (e: Exception) {
+                Logger.err(e.toString())
+                e.printStackTrace()
+            } finally {
+                ClientPool.deleteClient(newClient)
+                UIDPool.returnUID(newUID)
+                Logger.verbose("$newClient 下线了")
+            }
+        }
+
+        //私有协议消息以二进制形式发送，用于自写的客户端
+        webSocket("/app"){
+            val newUID = UIDPool.generateUID()
+            val newClient = Client(this, newUID)
+            Logger.verbose("$newClient 上线了")
+            newClient.sendMessage("Welcome to chatroom!Your id is $newUID.")
+
+            try {
+                while (true) {
+                    when (val frame = incoming.receiveCatching().getOrNull()) {
                         is Frame.Binary -> {
                             val rawMessage = byteToObject(frame.readBytes()) as Message
                             Logger.verbose(rawMessage.toString())
 
                             when (rawMessage) {
                                 is SimpleMessage -> {
-                                    val target = rawMessage.target.id
-                                    ClientPool.queryClient(target)?.sendMessage(rawMessage)
+                                    ClientPool.queryClient(rawMessage.target.id)?.sendMessage(rawMessage)
                                 }
+                                //TODO-重写
                                 is Command -> {
                                     when (rawMessage) {
                                         is LoginCmd -> {
@@ -86,12 +109,18 @@ fun Application.module() {
                                             loginCmd.response(this)
 
                                         }
+
                                         is UpdateCmd -> {
 
                                         }
                                     }
                                 }
                             }
+                        }
+
+                        null -> {
+                            close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No session"))
+                            return@webSocket
                         }
                         else -> {}
                     }

@@ -1,7 +1,4 @@
-package top.harumill.message.simpleMessage
-
-import top.harumill.message.Message
-import top.harumill.message.MessageChain
+package top.harumill.message
 
 /**
  * 单一类型消息接口，提供将单一类型消息转化为[MessageChain]的方法
