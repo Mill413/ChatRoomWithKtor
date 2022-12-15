@@ -1,10 +1,10 @@
 package top.harumill
 
-import io.ktor.application.*
 import io.ktor.http.*
-import io.ktor.http.cio.websocket.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
 import io.ktor.util.*
 import io.ktor.websocket.*
 import top.harumill.contact.UserInfo
@@ -16,15 +16,12 @@ import top.harumill.message.byteToObject
 import top.harumill.message.commandMessage.CommandMessage
 import top.harumill.message.commandMessage.LoginCmd
 import top.harumill.message.commandMessage.UpdateCmd
-import top.harumill.message.singleMessage.PlainText
 import top.harumill.utils.Logger
 import top.harumill.utils.UIDPool
 import java.time.Duration
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
-
-@OptIn(InternalAPI::class, kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 @Suppress("unused") // Referenced in application.conf
 fun Application.module() {
     install(WebSockets) {
@@ -38,9 +35,11 @@ fun Application.module() {
         get("/") {
             call.respondText("Hello!This is a testing Chatroom with WebSocket!", contentType = ContentType.Text.Plain)
         }
+
         webSocket("/echo") {
             val newUID = UIDPool.generateUID()
             val newClient = Client(this, newUID)
+            send("Hello!This is a testing Chatroom with WebSocket!Your id is $newUID")
 
             try {
                 while (true) {
@@ -49,15 +48,16 @@ fun Application.module() {
                             close(CloseReason(CloseReason.Codes.VIOLATED_POLICY, "No session"))
                             return@webSocket
                         }
+
                         is Frame.Text -> {
                             val rawMessage = frame.readText()
-                            Logger.verbose("Get message from $newClient: $rawMessage")
-                            newClient.sendMessage(PlainText(rawMessage))
+                            Logger.verbose("Recv from $newClient: $rawMessage")
+                            send(rawMessage)
                         }
+
                         is Frame.Binary -> {
                             val rawMessage = byteToObject(frame.readBytes()) as Message
                             Logger.verbose(rawMessage.toString())
-
                             when (rawMessage) {
                                 is ForwardMessage -> {
                                     val target = rawMessage.target.id
@@ -72,7 +72,6 @@ fun Application.module() {
                                     } else {
                                         ClientPool.queryClient(target)?.sendMessage(rawMessage)
                                     }
-
                                 }
                                 is CommandMessage -> {
                                     when (rawMessage) {
@@ -81,7 +80,7 @@ fun Application.module() {
                                                 rawMessage.info.id = newUID
                                             }
 
-                                            ClientPool.joinClinet(newClient)
+                                            ClientPool.joinClient(newClient)
                                             Logger.verbose("$newClient 上线了")
 
                                             val loginMsg = ForwardMessage(
@@ -102,9 +101,8 @@ fun Application.module() {
                                     }
                                 }
                             }
-
-
                         }
+                        else -> {}
                     }
                 }
             } catch (e: Exception) {

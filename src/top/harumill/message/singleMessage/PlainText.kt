@@ -9,7 +9,7 @@ class PlainText(text: String) : SingleMessage {
         const val serialVersionUID: Long = 21
     }
 
-    val content: String = text
+    private val content: String = text
 
     override fun contentToString(): String {
         return content

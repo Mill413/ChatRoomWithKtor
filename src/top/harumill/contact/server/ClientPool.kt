@@ -13,7 +13,7 @@ object ClientPool {
         return clientMap[id]
     }
 
-    fun joinClinet(newClient: Client) {
+    fun joinClient(newClient: Client) {
         clientMap[newClient.info.id] = newClient
     }
 

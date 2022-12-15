@@ -1,7 +1,7 @@
 package top.harumill.message.commandMessage
 
-import io.ktor.client.features.websocket.*
-import io.ktor.http.cio.websocket.*
+import io.ktor.client.plugins.websocket.*
+import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import top.harumill.contact.server.Client
 import top.harumill.message.Message

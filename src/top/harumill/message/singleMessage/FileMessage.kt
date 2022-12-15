@@ -8,7 +8,7 @@ class FileMessage(resource: File? = null) : SingleMessage {
     }
 
 
-    val file = resource
+    private val file = resource
 
     var fileType = file?.extension ?: ""
 

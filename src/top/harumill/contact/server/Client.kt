@@ -1,6 +1,6 @@
 package top.harumill.contact.server
 
-import io.ktor.http.cio.websocket.*
+import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import top.harumill.contact.Contact
 import top.harumill.contact.UserInfo
@@ -17,8 +17,7 @@ typealias Session = DefaultWebSocketServerSession
  * 服务器上的客户端类，一个Client实例表示一个已经连接的客户端
  * 不应通过[ForwardMessage]发送
  */
-class Client(val session: Session, private val id: Long) : Contact {
-
+class Client(val session: Session, id: Long) : Contact {
     companion object {
         const val serialVersionUID: Long = 11
     }
