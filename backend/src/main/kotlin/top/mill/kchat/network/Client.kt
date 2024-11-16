@@ -56,8 +56,8 @@ object Client {
         addressList.forEach { address -> sendMessageOnWebSocket(message, address) }
     }
 
-    suspend inline fun <reified T> getRequest(ip: InetAddress, port: Int = 8080, path: String): T {
-        val response = getClient().get("$ip:$port/$path")
+    internal suspend inline fun <reified T> getRequest(ip: InetAddress, port: Int = 8080, path: String): T {
+        val response = client.get("$ip:$port/$path")
         return Json.decodeFromString(response.body())
     }
 
@@ -67,7 +67,7 @@ object Client {
     suspend fun <T> putRequest(ip: InetAddress, port: Int = 8080, path: String, body: T) =
         client.put("$ip:$port/$path") { body }
 
-    suspend fun deleteRequest(ip: InetAddress, port: Int = 8080, path: String) = getClient().delete("$ip:$port/$path")
+    suspend fun deleteRequest(ip: InetAddress, port: Int = 8080, path: String) = client.delete("$ip:$port/$path")
 
     internal suspend inline fun <reified T> broadcastGetRequest(
         addressList: List<InetAddress> = onlineAddressList,
@@ -88,8 +88,6 @@ object Client {
         path: String,
         body: T
     ) = addressList.forEach { address -> putRequest(address, port, path, body) }
-
-    fun getClient() = client
 }
 
 fun Application.configureSockets() {
