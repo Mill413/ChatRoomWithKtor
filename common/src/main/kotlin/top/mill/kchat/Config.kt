@@ -5,6 +5,10 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
 
+const val BROADCAST_MESSAGE = "DISCOVER_USER"
+const val RESPONSE_MESSAGE = "USER_HERE"
+const val BROADCAST_DELAY = 500L
+const val BROADCAST_PORT = 8888
 
 object ConfigManager {
     val jsonFormatter = Json { prettyPrint = true }

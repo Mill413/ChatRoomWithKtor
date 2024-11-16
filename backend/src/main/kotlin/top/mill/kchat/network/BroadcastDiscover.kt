@@ -1,14 +1,12 @@
 package top.mill.kchat.network
 
-import top.mill.kchat.ConfigManager
+import top.mill.kchat.BROADCAST_MESSAGE
+import top.mill.kchat.BROADCAST_PORT
+import top.mill.kchat.RESPONSE_MESSAGE
 import top.mill.kchat.logger
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
-
-const val BROADCAST_PORT = 8888
-val BROADCAST_MESSAGE = ConfigManager.getConfig().broadcastMessage
-val RESPONSE_MESSAGE = ConfigManager.getConfig().responseMessage
 
 private val logger = logger("Network")
 

@@ -20,7 +20,7 @@ fun main(args: Array<String>) = runBlocking {
     val broadcastJob = launch(Dispatchers.Default) {
         while (true) {
             broadcastDiscoveryMessage()
-            delay(ConfigManager.getConfig().broadcastDelayMilliSecond)
+            delay(BROADCAST_DELAY)
         }
     }
 
