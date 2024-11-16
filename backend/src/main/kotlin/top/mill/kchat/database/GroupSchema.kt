@@ -20,7 +20,7 @@ class GroupSchema(database: Database) {
         override val primaryKey = PrimaryKey(groupUUID)
     }
 
-    object UsersGroups : Table("users_groups") {
+    object UserGroup : Table("user_group") {
         val userUUID = text("user_uuid")
         val groupUUID = text("group_uuid")
     }
@@ -28,6 +28,7 @@ class GroupSchema(database: Database) {
     init {
         transaction(database) {
             SchemaUtils.create(Groups)
+            SchemaUtils.create(UserGroup)
         }
     }
 
