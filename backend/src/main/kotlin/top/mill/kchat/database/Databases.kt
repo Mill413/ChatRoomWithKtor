@@ -1,18 +1,8 @@
 package top.mill.kchat.database
 
-import io.ktor.server.application.*
-import io.ktor.server.routing.*
 import org.jetbrains.exposed.sql.Database
 import top.mill.kchat.logger
-import top.mill.kchat.network.groupsRoute
-import top.mill.kchat.network.usersRoute
 
-fun Application.configureDatabases() {
-    routing {
-        usersRoute()
-        groupsRoute()
-    }
-}
 
 object DatabaseManager {
     private const val DB_PATH = "data/kchat.db"
