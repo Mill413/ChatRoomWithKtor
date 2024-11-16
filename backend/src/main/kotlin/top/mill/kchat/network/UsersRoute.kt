@@ -4,6 +4,8 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import top.mill.kchat.contacts.User
 import top.mill.kchat.service.UserService
 import java.net.InetAddress
@@ -14,7 +16,19 @@ fun Route.usersRoute() {
         get("/query") {
             val uuid = call.parameters["id"]
             val name = call.parameters["name"]
-            TODO("Return user by id or name")
+            when {
+                uuid != null -> {
+                    call.respondText(text = Json.encodeToString(service.queryUserByUUID(uuid)))
+                }
+
+                name != null -> {
+                    call.respondText(text = Json.encodeToString(service.queryUserByName(name)))
+                }
+
+                else         -> {
+                    call.respondText(text = "Parameter id or name is required", status = HttpStatusCode.BadRequest)
+                }
+            }
         }
 
         post {

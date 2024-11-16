@@ -69,6 +69,10 @@ class UserService {
         } else throw KChatException("User ${user.name} does not exist.", logger)
     }
 
+    suspend fun queryUserByUUID(uuid: String) = UserSchema(DatabaseManager.getDatabase()).getUserByUUID(uuid)
+
+    suspend fun queryUserByName(name: String) = UserSchema(DatabaseManager.getDatabase()).getUserByName(name)
+
     suspend fun deleteUser(user: User) {
         logger.info { "User ${user.name} deleted." }
         onLocalUser(user.id) {
