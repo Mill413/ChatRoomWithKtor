@@ -21,7 +21,7 @@ object Client {
         install(WebSockets)
     }
 
-    private val onlineAddressList = mutableListOf<InetAddress>()
+    private val deviceAddressList = mutableListOf<InetAddress>()
 
     private val uuidToAddressMap = mutableMapOf<String, InetAddress>()
 
@@ -29,10 +29,10 @@ object Client {
         logger.info { "LocalHost Address: ${InetAddress.getLocalHost().hostAddress}" }
     }
 
-    fun onlineCount(): Int = onlineAddressList.size
+    fun onlineCount(): Int = deviceAddressList.size
 
     fun addNewAddress(ip: InetAddress) {
-        onlineAddressList.add(ip)
+        deviceAddressList.add(ip)
     }
 
     fun updateUUID(uuid: String, ip: InetAddress) {
@@ -40,7 +40,7 @@ object Client {
     }
 
     fun deleteAddress(ip: InetAddress) {
-        onlineAddressList.remove(ip)
+        deviceAddressList.remove(ip)
     }
 
     fun getAddressByUUID(uuid: String): InetAddress? = uuidToAddressMap[uuid]
@@ -49,15 +49,24 @@ object Client {
         TODO("Send Text Message to certain IP via WebSocket")
     }
 
-    fun broadcastMessageOnWebSocket(message: String, addressList: List<InetAddress> = onlineAddressList) {
-        if (addressList != onlineAddressList && addressList.any { address -> address !in onlineAddressList }) {
+    fun broadcastMessageOnWebSocket(message: String, addressList: List<InetAddress> = deviceAddressList) {
+        if (addressList != deviceAddressList && addressList.any { address -> address !in deviceAddressList }) {
             logger.error { "Invalid address in List" }
         }
         addressList.forEach { address -> sendMessageOnWebSocket(message, address) }
     }
 
-    internal suspend inline fun <reified T> getRequest(ip: InetAddress, port: Int = 8080, path: String): T {
-        val response = client.get("$ip:$port/$path")
+    internal suspend inline fun <reified T> getRequest(
+        ip: InetAddress,
+        port: Int = 8080,
+        path: String,
+        params: Map<String, String>
+    ): T {
+        val response = client.get("$ip:$port/$path") {
+            url {
+                params.forEach { k, v -> parameters.append(k, v) }
+            }
+        }
         return Json.decodeFromString(response.body())
     }
 
@@ -70,20 +79,21 @@ object Client {
     suspend fun deleteRequest(ip: InetAddress, port: Int = 8080, path: String) = client.delete("$ip:$port/$path")
 
     internal suspend inline fun <reified T> broadcastGetRequest(
-        addressList: List<InetAddress> = onlineAddressList,
+        addressList: List<InetAddress> = deviceAddressList,
         port: Int = 8080,
-        path: String
-    ): List<T> = addressList.map { address -> getRequest(address, port, path) }
+        path: String,
+        params: Map<String, String>
+    ): List<T> = addressList.map { address -> getRequest(address, port, path, params) }
 
     suspend fun <T> broadcastPostRequest(
-        addressList: List<InetAddress> = onlineAddressList,
+        addressList: List<InetAddress> = deviceAddressList,
         port: Int = 8080,
         path: String,
         body: T
     ) = addressList.forEach { address -> postRequest(address, port, path, body) }
 
     suspend fun <T> broadcastPutRequest(
-        addressList: List<InetAddress> = onlineAddressList,
+        addressList: List<InetAddress> = deviceAddressList,
         port: Int = 8080,
         path: String,
         body: T
