@@ -71,7 +71,8 @@ object Client {
     suspend fun <T> putRequest(ip: InetAddress, port: Int = 8080, path: String, body: T) =
         client.put("$ip:$port/$path") { body }
 
-    suspend fun deleteRequest(ip: InetAddress, port: Int = 8080, path: String) = client.delete("$ip:$port/$path")
+    suspend fun <T> deleteRequest(ip: InetAddress, port: Int = 8080, path: String, body: T) =
+        client.delete("$ip:$port/$path") { body }
 
     internal suspend inline fun <reified T> broadcastGetRequest(
         addressList: List<InetAddress> = deviceAddressList,
@@ -93,6 +94,13 @@ object Client {
         path: String,
         body: T
     ) = addressList.forEach { address -> putRequest(address, port, path, body) }
+
+    suspend fun <T> broadcastDeleteRequest(
+        addressList: List<InetAddress> = deviceAddressList,
+        port: Int = 8080,
+        path: String,
+        body: T
+    ) = addressList.forEach { address -> deleteRequest(address, port, path, body) }
 }
 
 
