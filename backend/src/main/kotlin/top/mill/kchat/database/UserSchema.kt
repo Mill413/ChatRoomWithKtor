@@ -15,6 +15,7 @@ class UserSchema(database: Database) {
         val name = text("name")
         val uuid = text("uuid")
         val createTime = long("create_time")
+        val loginTime = long("login_time")
 
         override val primaryKey = PrimaryKey(uuid)
     }
@@ -30,6 +31,7 @@ class UserSchema(database: Database) {
             it[name] = user.name
             it[uuid] = user.id
             it[createTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+            it[loginTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
         }[Users.uuid]
     }
 
@@ -60,10 +62,18 @@ class UserSchema(database: Database) {
         }
     }
 
-    suspend fun updateUser(uuid: String, user: User) {
+    suspend fun updateUserName(uuid: String, user: User) {
         dbQuery {
             Users.update({ Users.uuid eq uuid }) {
                 it[name] = user.name
+            }
+        }
+    }
+
+    suspend fun updateUserLoginTime(uuid: String, login: Long) {
+        dbQuery {
+            Users.update({ Users.uuid eq uuid }) {
+                it[loginTime] = login
             }
         }
     }
