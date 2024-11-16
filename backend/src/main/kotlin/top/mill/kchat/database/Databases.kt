@@ -26,6 +26,8 @@ object DatabaseManager {
                 driver = "org.sqlite.JDBC"
             )
             logger("Database").info { "Connected to database $DB_PATH" }
+            UserSchema(database)
+            GroupSchema(database)
         } catch (e: Exception) {
             logger("Database").error(e) { "Error database connection" }
         }
