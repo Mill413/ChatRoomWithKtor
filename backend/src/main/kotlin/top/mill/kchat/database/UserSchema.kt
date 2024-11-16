@@ -11,13 +11,13 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 
 class UserSchema(database: Database) {
-    object Users : Table("Users") {
-        val name = text("name")
-        val uuid = text("uuid")
-        val createTime = long("create_time")
-        val loginTime = long("login_time")
+    object Users : Table("users") {
+        val userName = text("user_name")
+        val userUUID = text("user_uuid")
+        val userCreateTime = long("user_create_time")
+        val userLoginTime = long("user_login_time")
 
-        override val primaryKey = PrimaryKey(uuid)
+        override val primaryKey = PrimaryKey(userUUID)
     }
 
     init {
@@ -26,22 +26,22 @@ class UserSchema(database: Database) {
         }
     }
 
-    suspend fun create(user: User): String = dbQuery {
+    suspend fun createUser(user: User): String = dbQuery {
         Users.insert {
-            it[name] = user.name
-            it[uuid] = user.id
-            it[createTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
-            it[loginTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
-        }[Users.uuid]
+            it[userName] = user.name
+            it[userUUID] = user.id
+            it[userCreateTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+            it[userLoginTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+        }[Users.userUUID]
     }
 
-    suspend fun getByUUID(uuid: String): User? {
+    suspend fun getUserByUUID(uuid: String): User? {
         return dbQuery {
-            Users.selectAll().where { Users.uuid eq uuid }
+            Users.selectAll().where { Users.userUUID eq uuid }
                 .map {
                     User(
-                        name = it[Users.name],
-                        id = it[Users.uuid],
+                        name = it[Users.userName],
+                        id = it[Users.userUUID],
                         status = UserStatus.OFFLINE
                     )
                 }
@@ -49,13 +49,13 @@ class UserSchema(database: Database) {
         }
     }
 
-    suspend fun getByName(name: String): List<User>? {
+    suspend fun getUserByName(name: String): List<User>? {
         return dbQuery {
-            Users.selectAll().where { Users.name eq name }
+            Users.selectAll().where { Users.userName eq name }
                 .map {
                     User(
-                        name = it[Users.name],
-                        id = it[Users.uuid],
+                        name = it[Users.userName],
+                        id = it[Users.userUUID],
                         status = UserStatus.OFFLINE
                     )
                 }
@@ -64,23 +64,23 @@ class UserSchema(database: Database) {
 
     suspend fun updateUserName(uuid: String, user: User) {
         dbQuery {
-            Users.update({ Users.uuid eq uuid }) {
-                it[name] = user.name
+            Users.update({ Users.userUUID eq uuid }) {
+                it[userName] = user.name
             }
         }
     }
 
-    suspend fun updateUserLoginTime(uuid: String, login: Long) {
+    suspend fun updateUserLoginTime(uuid: String, loginTime: Long) {
         dbQuery {
-            Users.update({ Users.uuid eq uuid }) {
-                it[loginTime] = login
+            Users.update({ Users.userUUID eq uuid }) {
+                it[userLoginTime] = loginTime
             }
         }
     }
 
     suspend fun delete(uuid: String) {
         dbQuery {
-            Users.deleteWhere { Users.uuid eq uuid }
+            Users.deleteWhere { Users.userUUID eq uuid }
         }
     }
 
