@@ -9,8 +9,8 @@ import top.mill.kchat.service.usersRoute
 
 fun Application.configureDatabases() {
     routing {
-        usersRoute(DatabaseManager.getDatabase())
-        chatroomsRoute(DatabaseManager.getDatabase())
+        usersRoute()
+        chatroomsRoute()
     }
 }
 
