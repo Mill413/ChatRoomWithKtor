@@ -61,24 +61,33 @@ object Client {
         return Json.decodeFromString(response.body())
     }
 
-    suspend fun <T> postRequest(ip: InetAddress, port: Int = 8080, path: String, body: T) {
-        TODO("Post request")
-    }
+    suspend fun <T> postRequest(ip: InetAddress, port: Int = 8080, path: String, body: T) =
+        client.post("$ip:$port/$path") { body }
+
+    suspend fun <T> putRequest(ip: InetAddress, port: Int = 8080, path: String, body: T) =
+        client.put("$ip:$port/$path") { body }
+
+    suspend fun deleteRequest(ip: InetAddress, port: Int = 8080, path: String) = getClient().delete("$ip:$port/$path")
+
+    internal suspend inline fun <reified T> broadcastGetRequest(
+        addressList: List<InetAddress> = onlineAddressList,
+        port: Int = 8080,
+        path: String
+    ): List<T> = addressList.map { address -> getRequest(address, port, path) }
 
     suspend fun <T> broadcastPostRequest(
         addressList: List<InetAddress> = onlineAddressList,
         port: Int = 8080,
         path: String,
         body: T
-    ) {
-        addressList.forEach { address -> postRequest(address, port, path, body) }
-    }
+    ) = addressList.forEach { address -> postRequest(address, port, path, body) }
 
-    suspend fun <T> putRequest(ip: InetAddress, port: Int = 8080, path: String, message: String, body: T) {
-        TODO("Put request")
-    }
-
-    suspend fun deleteRequest(ip: InetAddress, port: Int = 8080, path: String) = getClient().delete("$ip:$port/$path")
+    suspend fun <T> broadcastPutRequest(
+        addressList: List<InetAddress> = onlineAddressList,
+        port: Int = 8080,
+        path: String,
+        body: T
+    ) = addressList.forEach { address -> putRequest(address, port, path, body) }
 
     fun getClient() = client
 }
