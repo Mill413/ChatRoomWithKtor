@@ -4,12 +4,13 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.jetbrains.exposed.sql.Database
 import top.mill.kchat.UUIDManager
+import top.mill.kchat.contacts.Contact
 import top.mill.kchat.contacts.User
 import top.mill.kchat.database.DatabaseManager
 import top.mill.kchat.database.UserSchema
 import top.mill.kchat.logger
+import top.mill.kchat.messages.Message
 import top.mill.kchat.network.Client
 import java.net.InetAddress
 
@@ -27,8 +28,8 @@ class UserService {
             Client.broadcastPostRequest(path = "user", body = user)
         }
         val userSchema = UserSchema(DatabaseManager.getDatabase())
-        if (userSchema.getByUUID(user.id) == null) {
-            return userSchema.create(user)
+        if (userSchema.getUserByUUID(user.id) == null) {
+            return userSchema.createUser(user)
         } else throw Exception("User ${user.name} already exists.")
     }
 
@@ -51,12 +52,16 @@ class UserService {
         TODO("Delete a user")
     }
 
+    fun sendMessage(from: User, to: Contact, message: Message) {
+        TODO("Send Message from a user to other user or a Chatroom")
+    }
+
     private inline fun onLocalUser(uuid: String, block: () -> Unit) {
         if (localUUID == uuid) block()
     }
 }
 
-fun Route.usersRoute(database: Database) {
+fun Route.usersRoute() {
     val service = UserService()
     route("/user") {
         get("/id/{id}") {
