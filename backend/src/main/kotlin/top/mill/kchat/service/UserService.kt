@@ -55,8 +55,18 @@ class UserService {
         } else throw KChatException("User ${user.name} does not exist.", logger)
     }
 
-    fun updateInfo() {
-        TODO("Update information of user")
+    suspend fun updateInfo(user: User, newName: String) {
+        logger.info { "User ${user.name} updated to new name: $newName." }
+        onLocalUser(user.id) {
+            Client.broadcastPutRequest(
+                path = "user/name",
+                body = User(id = user.id, status = user.status, name = newName)
+            )
+        }
+        val userSchema = UserSchema(DatabaseManager.getDatabase())
+        if (userSchema.getUserByUUID(user.id) != null) {
+            return userSchema.updateUserName(user.id, User(id = user.id, status = user.status, name = newName))
+        } else throw KChatException("User ${user.name} does not exist.", logger)
     }
 
     suspend fun deleteUser(user: User) {
