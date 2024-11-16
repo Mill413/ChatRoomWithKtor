@@ -70,7 +70,7 @@ class UserSchema(database: Database) {
         }
     }
 
-    suspend fun updateUserLoginTime(uuid: String, loginTime: Long) {
+    suspend fun updateUserLoginTime(uuid: String, loginTime: Long = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)) {
         dbQuery {
             Users.update({ Users.userUUID eq uuid }) {
                 it[userLoginTime] = loginTime
