@@ -1,9 +1,7 @@
 package top.mill.kchat.network
 
-import top.mill.kchat.BROADCAST_MESSAGE
-import top.mill.kchat.BROADCAST_PORT
-import top.mill.kchat.RESPONSE_MESSAGE
-import top.mill.kchat.logger
+import top.mill.kchat.*
+import top.mill.kchat.contacts.UserStatus
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
@@ -11,12 +9,14 @@ import java.net.InetAddress
 private val logger = logger("Network")
 
 fun broadcastDiscoveryMessage() {
-    DatagramSocket().use { socket ->
-        socket.broadcast = true
-        val data = BROADCAST_MESSAGE.toByteArray()
-        val packet = DatagramPacket(data, data.size, InetAddress.getByName("255.255.255.255"), BROADCAST_PORT)
-        socket.send(packet)
-        logger.info { "Send Broadcast message: $BROADCAST_MESSAGE To Port: $BROADCAST_PORT" }
+    if (localStatus == UserStatus.ONLINE) {
+        DatagramSocket().use { socket ->
+            socket.broadcast = true
+            val data = BROADCAST_MESSAGE.toByteArray()
+            val packet = DatagramPacket(data, data.size, InetAddress.getByName("255.255.255.255"), BROADCAST_PORT)
+            socket.send(packet)
+            logger.info { "Send Broadcast message: $BROADCAST_MESSAGE To Port: $BROADCAST_PORT" }
+        }
     }
 }
 
@@ -31,10 +31,12 @@ fun listenForResponses(onUserDiscovered: (InetAddress) -> Unit) {
 
         if (packet.address.hostAddress == InetAddress.getLocalHost().hostAddress) continue
         logger.info { "Received: $receivedMessage From Address: ${packet.address.hostAddress}" }
-        if (receivedMessage == BROADCAST_MESSAGE) {
-            respondToDiscovery(packet.address)
-        } else if (receivedMessage == RESPONSE_MESSAGE) {
-            onUserDiscovered(packet.address)
+        if (localStatus == UserStatus.ONLINE) {
+            if (receivedMessage == BROADCAST_MESSAGE) {
+                respondToDiscovery(packet.address)
+            } else if (receivedMessage == RESPONSE_MESSAGE) {
+                onUserDiscovered(packet.address)
+            }
         }
     }
 }
