@@ -1,12 +1,13 @@
 package top.mill.kchat
 
+import top.mill.kchat.exceptions.KChatException
 import java.io.File
 import java.io.FileNotFoundException
 import java.util.*
 
-private val logger = logger("UUIDManager")
 
 object UUIDManager {
+    private val logger = logger("UUIDManager")
     private const val UUID_FILE_PATH = "kchat-uuid"
     private var uuid: UUID? = null
 
@@ -30,6 +31,6 @@ object UUIDManager {
     }
 
     fun getUUIDString(): String {
-        return uuid?.toString() ?: ""
+        return uuid?.toString() ?: throw KChatException("UUID has not been loaded yet", logger)
     }
 }

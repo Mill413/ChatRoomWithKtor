@@ -16,6 +16,7 @@ class UserSchema(database: Database) {
         val userUUID = text("user_uuid")
         val userCreateTime = long("user_create_time")
         val userLoginTime = long("user_login_time")
+        val userStatus = text("user_status")
 
         override val primaryKey = PrimaryKey(userUUID)
     }
@@ -78,9 +79,17 @@ class UserSchema(database: Database) {
         }
     }
 
+    suspend fun updateUserStatus(uuid: String, status: UserStatus) {
+        dbQuery {
+            Users.update({ Users.userUUID eq uuid }) {
+                it[userStatus] = status.toString()
+            }
+        }
+    }
+
     suspend fun delete(uuid: String) {
         dbQuery {
-            Users.deleteWhere { Users.userUUID eq uuid }
+            Users.deleteWhere { userUUID eq uuid }
         }
     }
 
