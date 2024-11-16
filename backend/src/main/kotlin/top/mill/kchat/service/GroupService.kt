@@ -4,12 +4,12 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.jetbrains.exposed.sql.Database
-import top.mill.kchat.contacts.Chatroom
-import top.mill.kchat.database.ChatroomService
+import top.mill.kchat.contacts.Group
+import top.mill.kchat.database.DatabaseManager
+import top.mill.kchat.database.GroupSchema
 
 // TODO("Complete implementation of ChatroomService")
-class ChatroomService {
+class GroupService {
     fun createRoom() {}
 
     fun joinRoom() {}
@@ -19,8 +19,8 @@ class ChatroomService {
     fun deleteRoom() {}
 }
 
-fun Route.chatroomsRoute(database: Database) {
-    val service = ChatroomService(database = database)
+fun Route.chatroomsRoute() {
+    val service = GroupSchema(DatabaseManager.getDatabase())
     route("/room") {
         get("/id/{id}") {
             TODO("Get chatroom by ID")
@@ -32,8 +32,8 @@ fun Route.chatroomsRoute(database: Database) {
 
         post {
             try {
-                val room = call.receive<Chatroom>()
-                val uuid = service.create(room, room.creator)
+                val room = call.receive<Group>()
+                val uuid = service.createGroup(room, room.creator)
                 call.respondText(text = "Chatroom $uuid created", status = HttpStatusCode.Created)
             } catch (_: ContentTransformationException) {
                 call.respondText(text = "Failed to parse Chatroom", status = HttpStatusCode.BadRequest)

@@ -4,14 +4,11 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Chatroom(
+data class Group(
     var members: MutableList<User> = mutableListOf(),
-    val creator: String,
-    @SerialName("roomID")
+    val creator: User,
+    @SerialName("groupUUID")
     override val id: String,
-    @SerialName("roomName")
+    @SerialName("groupName")
     override val name: String
-) : Contact(
-    id = id,
-    name = name,
-)
+) : Contact()
