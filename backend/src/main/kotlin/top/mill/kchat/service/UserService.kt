@@ -13,7 +13,6 @@ import top.mill.kchat.logger
 import top.mill.kchat.network.Client
 import java.net.InetAddress
 
-// TODO("Complete implementation of UserService")
 // Local invoke -> Request from client to broadcast & Storage data
 // Network invoke -> Storage data
 class UserService {
@@ -33,13 +32,24 @@ class UserService {
         } else throw Exception("User ${user.name} already exists.")
     }
 
-    fun login() {}
+    suspend fun login(user: User) {
+        logger.info { "User ${user.name} logged in." }
+        onLocalUser(user.id) {
+            Client.broadcastPutRequest(path = "user/login", body = user)
+        }
+    }
 
-    fun logout() {}
+    fun logout() {
+        TODO("Logout")
+    }
 
-    fun updateInfo() {}
+    fun updateInfo() {
+        TODO("Update information of user")
+    }
 
-    fun deleteUser() {}
+    fun deleteUser() {
+        TODO("Delete a user")
+    }
 
     private inline fun onLocalUser(uuid: String, block: () -> Unit) {
         if (localUUID == uuid) block()
@@ -72,8 +82,13 @@ fun Route.usersRoute(database: Database) {
             }
         }
 
-        put("/{id}") {
-            TODO("Update user by ID")
+        put("/name") {
+            TODO("Update User Name by ID")
+        }
+
+        put("/login") {
+            val user = call.receive<User>()
+            service.login(user)
         }
 
         delete("/{id}") {
