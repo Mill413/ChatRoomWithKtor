@@ -39,6 +39,5 @@ fun main(args: Array<String>) = runBlocking {
 
 fun Application.module() {
     configureSerialization()
-    configureDatabases()
     configureSockets()
 }

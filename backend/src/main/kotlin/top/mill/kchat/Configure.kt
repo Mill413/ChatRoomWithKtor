@@ -16,13 +16,6 @@ fun Application.configureSerialization() {
     }
 }
 
-fun Application.configureDatabases() {
-    routing {
-        usersRoute()
-        groupsRoute()
-    }
-}
-
 fun Application.configureSockets() {
     install(WebSockets) {
         pingPeriod = 15.seconds
@@ -32,5 +25,7 @@ fun Application.configureSockets() {
     }
     routing {
         chatRoute()
+        usersRoute()
+        groupsRoute()
     }
 }
