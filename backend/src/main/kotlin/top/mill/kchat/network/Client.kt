@@ -55,14 +55,11 @@ object Client {
         port: Int = 8080,
         path: String,
         params: Map<String, String>
-    ): T {
-        val response = client.get("${uuidToAddress[uuid]}:$port/$path") {
-            url {
-                params.forEach { k, v -> parameters.append(k, v) }
-            }
+    ): T = client.get("${uuidToAddress[uuid]}:$port/$path") {
+        url {
+            params.forEach { k, v -> parameters.append(k, v) }
         }
-        return Json.decodeFromString(response.body())
-    }
+    }.let { response -> Json.decodeFromString(response.body()) }
 
     suspend fun <T> postRequest(uuid: String, port: Int = 8080, path: String, body: T) =
         client.post("${uuidToAddress[uuid]}:$port/$path") { body }
@@ -78,14 +75,8 @@ object Client {
         port: Int = 8080,
         path: String,
         params: Map<String, String>
-    ): List<T> {
-        val list = mutableListOf<T>()
-        uuidList.forEach { uuid ->
-            if (uuid in uuidToAddress) {
-                list.add(getRequest(uuid, port, path, params))
-            }
-        }
-        return list
+    ): List<T> = uuidList.mapNotNull { uuid ->
+        uuid.takeIf { it in uuidToAddress }?.let { getRequest(it, port, path, params) }
     }
 
     suspend fun <T> broadcastPostRequest(
