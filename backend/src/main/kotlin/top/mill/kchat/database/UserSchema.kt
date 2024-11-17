@@ -33,6 +33,7 @@ class UserSchema(database: Database) {
             it[userUUID] = user.id
             it[userCreateTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
             it[userLoginTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+            it[userStatus] = user.status.toString()
         }[Users.userUUID]
     }
 
@@ -50,7 +51,7 @@ class UserSchema(database: Database) {
         }
     }
 
-    suspend fun getUserByName(name: String): List<User>? {
+    suspend fun getUserByName(name: String): List<User> {
         return dbQuery {
             Users.selectAll().where { Users.userName eq name }
                 .map {
