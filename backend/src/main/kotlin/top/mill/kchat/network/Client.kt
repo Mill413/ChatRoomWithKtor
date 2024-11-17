@@ -16,9 +16,9 @@ object Client {
         install(WebSockets)
     }
 
-    private val deviceAddressList = mutableListOf<InetAddress>()
+    private val deviceAddressList = mutableSetOf<InetAddress>()
 
-    private val uuidToAddressMap = mutableMapOf<String, InetAddress>()
+    private val uuidToAddress = mutableMapOf<String, InetAddress>()
 
     init {
         logger.info { "LocalHost Address: ${InetAddress.getLocalHost().hostAddress}" }
@@ -26,38 +26,37 @@ object Client {
 
     fun onlineCount(): Int = deviceAddressList.size
 
-    fun addNewAddress(ip: InetAddress) {
+    fun addNewAddress(ip: InetAddress) =
         deviceAddressList.add(ip)
-    }
 
     fun updateUUID(uuid: String, ip: InetAddress) {
-        uuidToAddressMap[uuid] = ip
+        uuidToAddress[uuid] = ip
     }
 
-    fun deleteAddress(ip: InetAddress) {
+    fun deleteAddress(ip: InetAddress) =
         deviceAddressList.remove(ip)
-    }
 
-    fun getAddressByUUID(uuid: String): InetAddress? = uuidToAddressMap[uuid]
+//    fun getAddressByUUID(uuid: String): InetAddress? {}
+//        uuidToAddress.entries.filter { it.value == uuid }.map { it.key }.singleOrNull()
 
-    fun sendMessageOnWebSocket(message: String, address: InetAddress) {
+    fun sendMessageOnWebSocket(message: String, uuid: String) {
         TODO("Send Text Message to certain IP via WebSocket")
     }
 
-    fun broadcastMessageOnWebSocket(message: String, addressList: List<InetAddress> = deviceAddressList) {
-        if (addressList != deviceAddressList && addressList.any { address -> address !in deviceAddressList }) {
+    fun broadcastMessageOnWebSocket(message: String, uuidList: List<String> = uuidToAddress.keys.toList()) {
+        if (TODO("Check address valid")) {
             logger.error { "Invalid address in List" }
         }
-        addressList.forEach { address -> sendMessageOnWebSocket(message, address) }
+        uuidList.forEach { uuid -> sendMessageOnWebSocket(message, uuid) }
     }
 
     internal suspend inline fun <reified T> getRequest(
-        ip: InetAddress,
+        uuid: String,
         port: Int = 8080,
         path: String,
         params: Map<String, String>
     ): T {
-        val response = client.get("$ip:$port/$path") {
+        val response = client.get("${uuidToAddress[uuid]}:$port/$path") {
             url {
                 params.forEach { k, v -> parameters.append(k, v) }
             }
@@ -65,42 +64,62 @@ object Client {
         return Json.decodeFromString(response.body())
     }
 
-    suspend fun <T> postRequest(ip: InetAddress, port: Int = 8080, path: String, body: T) =
-        client.post("$ip:$port/$path") { body }
+    suspend fun <T> postRequest(uuid: String, port: Int = 8080, path: String, body: T) =
+        client.post("${uuidToAddress[uuid]}:$port/$path") { body }
 
-    suspend fun <T> putRequest(ip: InetAddress, port: Int = 8080, path: String, body: T) =
-        client.put("$ip:$port/$path") { body }
+    suspend fun <T> putRequest(uuid: String, port: Int = 8080, path: String, body: T) =
+        client.put("${uuidToAddress[uuid]}:$port/$path") { body }
 
-    suspend fun <T> deleteRequest(ip: InetAddress, port: Int = 8080, path: String, body: T) =
-        client.delete("$ip:$port/$path") { body }
+    suspend fun <T> deleteRequest(uuid: String, port: Int = 8080, path: String, body: T) =
+        client.delete("${uuidToAddress[uuid]}:$port/$path") { body }
 
     internal suspend inline fun <reified T> broadcastGetRequest(
-        addressList: List<InetAddress> = deviceAddressList,
+        uuidList: List<String> = uuidToAddress.keys.toList(),
         port: Int = 8080,
         path: String,
         params: Map<String, String>
-    ): List<T> = addressList.map { address -> getRequest(address, port, path, params) }
+    ): List<T> {
+        val list = mutableListOf<T>()
+        uuidList.forEach { uuid ->
+            if (uuid in uuidToAddress) {
+                list.add(getRequest(uuid, port, path, params))
+            }
+        }
+        return list
+    }
 
     suspend fun <T> broadcastPostRequest(
-        addressList: List<InetAddress> = deviceAddressList,
+        uuidList: List<String> = uuidToAddress.keys.toList(),
         port: Int = 8080,
         path: String,
         body: T
-    ) = addressList.forEach { address -> postRequest(address, port, path, body) }
+    ) = uuidList.forEach { uuid ->
+        if (uuid in uuidToAddress) {
+            postRequest(uuid, port, path, body)
+        }
+    }
 
     suspend fun <T> broadcastPutRequest(
-        addressList: List<InetAddress> = deviceAddressList,
+        uuidList: List<String> = uuidToAddress.keys.toList(),
         port: Int = 8080,
         path: String,
         body: T
-    ) = addressList.forEach { address -> putRequest(address, port, path, body) }
+    ) = uuidList.forEach { uuid ->
+        if (uuid in uuidToAddress) {
+            putRequest(uuid, port, path, body)
+        }
+    }
 
     suspend fun <T> broadcastDeleteRequest(
-        addressList: List<InetAddress> = deviceAddressList,
+        uuidList: List<String> = uuidToAddress.keys.toList(),
         port: Int = 8080,
         path: String,
         body: T
-    ) = addressList.forEach { address -> deleteRequest(address, port, path, body) }
+    ) = uuidList.forEach { uuid ->
+        if (uuid in uuidToAddress) {
+            deleteRequest(uuid, port, path, body)
+        }
+    }
 }
 
 
