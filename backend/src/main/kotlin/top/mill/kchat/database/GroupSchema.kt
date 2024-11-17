@@ -32,7 +32,7 @@ class GroupSchema(database: Database) {
         }
     }
 
-    suspend fun createGroup(group: Group, creator: User): String = dbQuery {
+    suspend fun createGroup(group: Group, creatorUUID: String): String = dbQuery {
         group.members.forEach { user ->
             UserGroup.insert {
                 it[userUUID] = user.id
@@ -42,21 +42,77 @@ class GroupSchema(database: Database) {
         Groups.insert {
             it[groupName] = group.name
             it[groupUUID] = group.id
-            it[groupCreatorUUID] = creator.id
+            it[groupCreatorUUID] = creatorUUID
             it[groupCreateTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
         }[Groups.groupUUID]
     }
 
     suspend fun getGroupByUUID(uuid: String): Group? = dbQuery {
-        TODO("Get a group from group table and user_group table by group_uuid")
+        Groups.selectAll().where {
+            Groups.groupUUID eq uuid
+        }.map {
+            Group(
+                id = it[Groups.groupUUID],
+                name = it[Groups.groupName],
+                creator = it[Groups.groupCreatorUUID]
+            )
+        }.singleOrNull()
     }
 
-    suspend fun getGroupsByName(name: String): List<Group>? = dbQuery {
-        TODO("Get a group from group table and user_group table by group_name")
+    suspend fun getGroupsByName(name: String): List<Group> = dbQuery {
+        Groups.selectAll().where {
+            Groups.groupName eq name
+        }.map {
+            Group(
+                id = it[Groups.groupUUID],
+                name = it[Groups.groupName],
+                creator = it[Groups.groupCreatorUUID]
+            )
+        }
     }
 
-    suspend fun updateGroupName(id: Int, room: Group) = dbQuery {
-        TODO("Update group name")
+    suspend fun getUsersByGroup(group: Group) = dbQuery {
+        (Groups innerJoin UserGroup)
+            .select(
+                Groups.groupUUID,
+                Groups.groupName,
+                Groups.groupCreatorUUID
+            )
+            .where { UserGroup.groupUUID eq group.id }
+            .map {
+                Group(
+                    name = it[Groups.groupName],
+                    id = it[Groups.groupUUID],
+                    creator = it[Groups.groupCreatorUUID]
+                )
+            }
+    }
+
+    suspend fun getGroupsByUser(user: User) = dbQuery {
+        (Groups innerJoin UserGroup)
+            .select(
+                Groups.groupUUID,
+                Groups.groupName,
+                Groups.groupCreatorUUID
+            )
+            .where { UserGroup.userUUID eq user.id }
+            .map {
+                Group(
+                    name = it[Groups.groupName],
+                    id = it[Groups.groupUUID],
+                    creator = it[Groups.groupCreatorUUID]
+                )
+            }
+    }
+
+    suspend fun deleteGroupByUUID(uuid: String) = dbQuery {
+        Groups.deleteWhere { groupUUID eq uuid }
+    }
+
+    suspend fun updateGroupName(uuid: String, newGroup: Group) = dbQuery {
+        Groups.update({ Groups.groupUUID eq uuid }) {
+            it[groupName] = newGroup.name
+        }
     }
 
     suspend fun addUserGroup(user: User, group: Group) = dbQuery {
@@ -72,12 +128,6 @@ class GroupSchema(database: Database) {
             groupUUID eq group.id
         }
     }
-
-
-    suspend fun deleteGroupByUUID(uuid: String) = dbQuery {
-        Groups.deleteWhere { groupUUID eq uuid }
-    }
-
 
     private suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
