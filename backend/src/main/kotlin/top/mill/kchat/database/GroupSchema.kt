@@ -33,6 +33,12 @@ class GroupSchema(database: Database) {
     }
 
     suspend fun createGroup(group: Group, creator: User): String = dbQuery {
+        group.members.forEach { user ->
+            UserGroup.insert {
+                it[userUUID] = user.id
+                it[groupUUID] = group.id
+            }
+        }
         Groups.insert {
             it[groupName] = group.name
             it[groupUUID] = group.id
@@ -41,23 +47,37 @@ class GroupSchema(database: Database) {
         }[Groups.groupUUID]
     }
 
-    suspend fun getGroupByUUID(uuid: String): Group? {
+    suspend fun getGroupByUUID(uuid: String): Group? = dbQuery {
         TODO("Get a group from group table and user_group table by group_uuid")
     }
 
-    suspend fun getGroupsByName(name: String): List<Group>? {
+    suspend fun getGroupsByName(name: String): List<Group>? = dbQuery {
         TODO("Get a group from group table and user_group table by group_name")
     }
 
-    suspend fun updateGroupName(id: Int, room: Group) {
+    suspend fun updateGroupName(id: Int, room: Group) = dbQuery {
         TODO("Update group name")
     }
 
-    suspend fun delete(uuid: String) {
-        dbQuery {
-            Groups.deleteWhere { groupUUID eq uuid }
+    suspend fun addUserGroup(user: User, group: Group) = dbQuery {
+        UserGroup.insert {
+            it[userUUID] = user.id
+            it[groupUUID] = group.id
         }
     }
+
+    suspend fun deleteUserGroup(user: User, group: Group) = dbQuery {
+        UserGroup.deleteWhere {
+            userUUID eq user.id
+            groupUUID eq group.id
+        }
+    }
+
+
+    suspend fun deleteGroupByUUID(uuid: String) = dbQuery {
+        Groups.deleteWhere { groupUUID eq uuid }
+    }
+
 
     private suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
