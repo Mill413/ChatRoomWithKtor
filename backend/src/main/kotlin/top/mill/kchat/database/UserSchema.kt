@@ -37,62 +37,57 @@ class UserSchema(database: Database) {
         }[Users.userUUID]
     }
 
-    suspend fun getUserByUUID(uuid: String): User? {
-        return dbQuery {
-            Users.selectAll().where { Users.userUUID eq uuid }
-                .map {
-                    User(
-                        name = it[Users.userName],
-                        id = it[Users.userUUID],
-                        status = UserStatus.OFFLINE
-                    )
-                }
-                .singleOrNull()
-        }
-    }
-
-    suspend fun getUserByName(name: String): List<User> {
-        return dbQuery {
-            Users.selectAll().where { Users.userName eq name }
-                .map {
-                    User(
-                        name = it[Users.userName],
-                        id = it[Users.userUUID],
-                        status = UserStatus.OFFLINE
-                    )
-                }
-        }
-    }
-
-    suspend fun updateUserName(uuid: String, user: User) {
-        dbQuery {
-            Users.update({ Users.userUUID eq uuid }) {
-                it[userName] = user.name
+    suspend fun getUserByUUID(uuid: String): User? = dbQuery {
+        Users.selectAll().where { Users.userUUID eq uuid }
+            .map {
+                User(
+                    name = it[Users.userName],
+                    id = it[Users.userUUID],
+                    status = UserStatus.OFFLINE
+                )
             }
+            .singleOrNull()
+    }
+
+
+    suspend fun getUserByName(name: String): List<User> = dbQuery {
+        Users.selectAll().where { Users.userName eq name }
+            .map {
+                User(
+                    name = it[Users.userName],
+                    id = it[Users.userUUID],
+                    status = UserStatus.OFFLINE
+                )
+            }
+    }
+
+
+    suspend fun updateUserName(uuid: String, user: User) = dbQuery {
+        Users.update({ Users.userUUID eq uuid }) {
+            it[userName] = user.name
         }
     }
 
-    suspend fun updateUserLoginTime(uuid: String, loginTime: Long = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)) {
+
+    suspend fun updateUserLoginTime(uuid: String, loginTime: Long = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)) =
         dbQuery {
             Users.update({ Users.userUUID eq uuid }) {
                 it[userLoginTime] = loginTime
             }
         }
-    }
 
-    suspend fun updateUserStatus(uuid: String, status: UserStatus) {
-        dbQuery {
-            Users.update({ Users.userUUID eq uuid }) {
-                it[userStatus] = status.toString()
-            }
+
+    suspend fun updateUserStatus(uuid: String, status: UserStatus) = dbQuery {
+        Users.update({ Users.userUUID eq uuid }) {
+            it[userStatus] = status.toString()
         }
     }
 
-    suspend fun delete(uuid: String) {
-        dbQuery {
-            Users.deleteWhere { userUUID eq uuid }
-        }
+
+    suspend fun delete(uuid: String) = dbQuery {
+        Users.deleteWhere { userUUID eq uuid }
     }
+
 
     private suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
