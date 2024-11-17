@@ -1,0 +1,74 @@
+### Create test1
+POST http://localhost:8080/user
+Content-Type: application/json
+
+{
+  "userUUID": "test1",
+  "userName": "test1",
+  "status": "ONLINE"
+}
+
+### Create same name test1
+POST http://localhost:8080/user
+Content-Type: application/json
+
+{
+  "userUUID": "test1-1",
+  "userName": "test1",
+  "status": "ONLINE"
+}
+
+### Create test2
+POST http://localhost:8080/user
+Content-Type: application/json
+
+{
+  "userUUID": "test2",
+  "userName": "test2",
+  "status": "ONLINE"
+}
+
+### Get test1 by uuid
+GET http://localhost:8080/user/query?id=test1
+
+### Get test1 by name
+GET http://localhost:8080/user/query?name=test1
+
+### Get non exist uuid test3
+GET http://localhost:8080/user/query?id=test3
+
+### Get by wrong parameters
+GET http://localhost:8080/user/query?uuid=test1
+
+### test1 login
+PUT http://localhost:8080/user/login
+Content-Type: application/json
+
+{
+  "userUUID": "test1",
+  "userName": "test1",
+  "status": "ONLINE"
+}
+
+### non exist test3 login
+PUT http://localhost:8080/user/login
+Content-Type: application/json
+
+{
+  "userUUID": "test3",
+  "userName": "test3",
+  "status": "ONLINE"
+}
+
+### Update text1 name to text1.1
+PUT http://localhost:8080/user/name
+Content-Type: application/json
+
+{
+  "userUUID": "test1",
+  "userName": "test1.1",
+  "status": "ONLINE"
+}
+
+### Delete test2
+DELETE http://localhost:8080/user/test2
