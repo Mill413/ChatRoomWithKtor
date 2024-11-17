@@ -31,7 +31,7 @@ class UserService {
         } else throw KChatException("User ${user.name} already exists.", logger)
     }
 
-    suspend fun login(user: User) {
+    suspend fun login(user: User): Int {
         logger.info { "User ${user.name} logged in." }
         onLocalUser(user.id) {
             Client.broadcastPutRequest(path = "user/login", body = user)
@@ -43,7 +43,7 @@ class UserService {
         } else throw KChatException("User ${user.name} does not exist.", logger)
     }
 
-    suspend fun logout(user: User) {
+    suspend fun logout(user: User): Int {
         logger.info { "User ${user.name} logged out." }
         onLocalUser(user.id) {
             Client.broadcastPostRequest(path = "user/logout", body = user)
@@ -55,7 +55,7 @@ class UserService {
         } else throw KChatException("User ${user.name} does not exist.", logger)
     }
 
-    suspend fun updateInfo(newUser: User) {
+    suspend fun updateInfo(newUser: User): Int {
         logger.info { "User ${newUser.id} updated to new name: ${newUser.name}." }
         onLocalUser(newUser.id) {
             Client.broadcastPutRequest(
@@ -73,7 +73,7 @@ class UserService {
 
     suspend fun queryUserByName(name: String) = UserSchema(DatabaseManager.getDatabase()).getUserByName(name)
 
-    suspend fun deleteUser(uuid: String) {
+    suspend fun deleteUser(uuid: String): Int {
         logger.info { "User $uuid deleted." }
         onLocalUser(uuid) {
             Client.broadcastDeleteRequest(path = "user/${uuid}", body = uuid)
