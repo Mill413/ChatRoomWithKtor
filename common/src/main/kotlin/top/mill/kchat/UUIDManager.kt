@@ -5,7 +5,6 @@ import java.io.File
 import java.io.FileNotFoundException
 import java.util.*
 
-
 object UUIDManager {
     private val logger = logger("UUIDManager")
     private const val UUID_FILE_PATH = "kchat-uuid"

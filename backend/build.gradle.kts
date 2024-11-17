@@ -36,7 +36,6 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:2.3.4")
     implementation("io.ktor:ktor-client-websockets:2.3.4")
 
-
     // database
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")

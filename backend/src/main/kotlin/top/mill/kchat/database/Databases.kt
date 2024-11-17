@@ -3,7 +3,6 @@ package top.mill.kchat.database
 import org.jetbrains.exposed.sql.Database
 import top.mill.kchat.logger
 
-
 object DatabaseManager {
     private const val DB_PATH = "data/kchat.db"
 
