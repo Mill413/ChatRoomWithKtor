@@ -55,33 +55,33 @@ class UserService {
         } else throw KChatException("User ${user.name} does not exist.", logger)
     }
 
-    suspend fun updateInfo(user: User, newName: String) {
-        logger.info { "User ${user.name} updated to new name: $newName." }
-        onLocalUser(user.id) {
+    suspend fun updateInfo(newUser: User) {
+        logger.info { "User ${newUser.id} updated to new name: ${newUser.name}." }
+        onLocalUser(newUser.id) {
             Client.broadcastPutRequest(
                 path = "user/name",
-                body = User(id = user.id, status = user.status, name = newName)
+                body = newUser
             )
         }
         val userSchema = UserSchema(DatabaseManager.getDatabase())
-        if (userSchema.getUserByUUID(user.id) != null) {
-            return userSchema.updateUserName(user.id, User(id = user.id, status = user.status, name = newName))
-        } else throw KChatException("User ${user.name} does not exist.", logger)
+        if (userSchema.getUserByUUID(newUser.id) != null) {
+            return userSchema.updateUserName(newUser.id, newUser)
+        } else throw KChatException("User ${newUser.name} does not exist.", logger)
     }
 
     suspend fun queryUserByUUID(uuid: String) = UserSchema(DatabaseManager.getDatabase()).getUserByUUID(uuid)
 
     suspend fun queryUserByName(name: String) = UserSchema(DatabaseManager.getDatabase()).getUserByName(name)
 
-    suspend fun deleteUser(user: User) {
-        logger.info { "User ${user.name} deleted." }
-        onLocalUser(user.id) {
-            Client.broadcastDeleteRequest(path = "user/${user.id}", body = user)
+    suspend fun deleteUser(uuid: String) {
+        logger.info { "User $uuid deleted." }
+        onLocalUser(uuid) {
+            Client.broadcastDeleteRequest(path = "user/${uuid}", body = uuid)
         }
         val userSchema = UserSchema(DatabaseManager.getDatabase())
-        if (userSchema.getUserByUUID(user.id) != null) {
-            return userSchema.delete(user.id)
-        } else throw KChatException("User ${user.name} does not exist.", logger)
+        if (userSchema.getUserByUUID(uuid) != null) {
+            return userSchema.delete(uuid)
+        } else throw KChatException("User $uuid does not exist.", logger)
     }
 
     fun sendMessage(from: User, to: Contact, message: Message) {
