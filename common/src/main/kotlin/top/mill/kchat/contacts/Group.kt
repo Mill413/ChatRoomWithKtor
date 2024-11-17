@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Group(
     var members: MutableList<User> = mutableListOf(),
-    val creator: User,
+    val creator: String,
     @SerialName("groupUUID")
     override val id: String,
     @SerialName("groupName")
