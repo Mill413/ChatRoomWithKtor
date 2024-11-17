@@ -50,7 +50,7 @@ fun Route.usersRoute() {
                 val remoteAddress = call.request.origin.remoteHost
                 logger.info { "Received from $remoteAddress: $user" }
 
-                val uuid = service.create(user)
+                val uuid = service.createUser(user)
                 Client.updateUUID(uuid, InetAddress.getByName(remoteAddress))
                 call.respondText(
                     text = "User $uuid from $remoteAddress created",

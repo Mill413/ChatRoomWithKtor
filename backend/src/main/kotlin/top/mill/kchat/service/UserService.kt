@@ -16,7 +16,7 @@ class UserService {
     private val logger = logger("Application")
     private val localUUID = UUIDManager.getUUIDString()
 
-    suspend fun create(user: User): String {
+    suspend fun createUser(user: User): String {
         logger.info { "User ${user.name} created." }
 
         onLocalUser(user.id) {
