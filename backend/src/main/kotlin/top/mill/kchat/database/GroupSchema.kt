@@ -32,7 +32,7 @@ class GroupSchema(database: Database) {
         }
     }
 
-    suspend fun createGroup(group: Group, creatorUUID: String): String = dbQuery {
+    suspend fun createGroup(group: Group) = dbQuery {
         group.members.forEach { user ->
             UserGroup.insert {
                 it[userUUID] = user.id
@@ -42,12 +42,12 @@ class GroupSchema(database: Database) {
         Groups.insert {
             it[groupName] = group.name
             it[groupUUID] = group.id
-            it[groupCreatorUUID] = creatorUUID
+            it[groupCreatorUUID] = group.creator
             it[groupCreateTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
         }[Groups.groupUUID]
     }
 
-    suspend fun getGroupByUUID(uuid: String): Group? = dbQuery {
+    suspend fun getGroupByUUID(uuid: String) = dbQuery {
         Groups.selectAll().where {
             Groups.groupUUID eq uuid
         }.map {
@@ -59,7 +59,7 @@ class GroupSchema(database: Database) {
         }.singleOrNull()
     }
 
-    suspend fun getGroupsByName(name: String): List<Group> = dbQuery {
+    suspend fun getGroupsByName(name: String) = dbQuery {
         Groups.selectAll().where {
             Groups.groupName eq name
         }.map {
@@ -119,7 +119,7 @@ class GroupSchema(database: Database) {
         UserGroup.insert {
             it[userUUID] = user.id
             it[groupUUID] = group.id
-        }
+        }[Groups.groupUUID]
     }
 
     suspend fun deleteUserGroup(user: User, group: Group) = dbQuery {
