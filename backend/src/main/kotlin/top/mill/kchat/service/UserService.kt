@@ -12,11 +12,8 @@ import top.mill.kchat.logger
 import top.mill.kchat.messages.Message
 import top.mill.kchat.network.Client
 
-// Local invoke -> Request from client to broadcast & Storage data
-// Network invoke -> Storage data
 class UserService {
     private val logger = logger("Application")
-
     private val localUUID = UUIDManager.getUUIDString()
 
     suspend fun create(user: User): String {
@@ -25,6 +22,7 @@ class UserService {
         onLocalUser(user.id) {
             Client.broadcastPostRequest(path = "user", body = user)
         }
+
         val userSchema = UserSchema(DatabaseManager.getDatabase())
         if (userSchema.getUserByUUID(user.id) == null) {
             return userSchema.createUser(user)
