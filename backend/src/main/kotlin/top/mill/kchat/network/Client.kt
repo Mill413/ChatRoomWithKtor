@@ -26,15 +26,13 @@ object Client {
 
     fun onlineCount(): Int = deviceAddressList.size
 
-    fun addNewAddress(ip: InetAddress) =
-        deviceAddressList.add(ip)
+    fun addNewAddress(ip: InetAddress) = deviceAddressList.add(ip)
 
     fun updateUUID(uuid: String, ip: InetAddress) {
         uuidToAddress[uuid] = ip
     }
 
-    fun deleteAddress(ip: InetAddress) =
-        deviceAddressList.remove(ip)
+    fun deleteAddress(ip: InetAddress) = deviceAddressList.remove(ip)
 
 //    fun getAddressByUUID(uuid: String): InetAddress? {}
 //        uuidToAddress.entries.filter { it.value == uuid }.map { it.key }.singleOrNull()
@@ -43,18 +41,13 @@ object Client {
         TODO("Send Text Message to certain IP via WebSocket")
     }
 
-    fun broadcastMessageOnWebSocket(message: String, uuidList: List<String> = uuidToAddress.keys.toList()) {
-        if (TODO("Check address valid")) {
-            logger.error { "Invalid address in List" }
+    fun broadcastMessageOnWebSocket(message: String, uuidList: List<String> = uuidToAddress.keys.toList()) =
+        uuidList.forEach { uuid ->
+            if (uuid in uuidToAddress) sendMessageOnWebSocket(message, uuid)
         }
-        uuidList.forEach { uuid -> sendMessageOnWebSocket(message, uuid) }
-    }
 
     internal suspend inline fun <reified T> getRequest(
-        uuid: String,
-        port: Int = 8080,
-        path: String,
-        params: Map<String, String>
+        uuid: String, port: Int = 8080, path: String, params: Map<String, String>
     ): T = client.get("${uuidToAddress[uuid]}:$port/$path") {
         url {
             params.forEach { k, v -> parameters.append(k, v) }
@@ -80,10 +73,7 @@ object Client {
     }
 
     suspend fun <T> broadcastPostRequest(
-        uuidList: List<String> = uuidToAddress.keys.toList(),
-        port: Int = 8080,
-        path: String,
-        body: T
+        uuidList: List<String> = uuidToAddress.keys.toList(), port: Int = 8080, path: String, body: T
     ) = uuidList.forEach { uuid ->
         if (uuid in uuidToAddress) {
             postRequest(uuid, port, path, body)
@@ -91,10 +81,7 @@ object Client {
     }
 
     suspend fun <T> broadcastPutRequest(
-        uuidList: List<String> = uuidToAddress.keys.toList(),
-        port: Int = 8080,
-        path: String,
-        body: T
+        uuidList: List<String> = uuidToAddress.keys.toList(), port: Int = 8080, path: String, body: T
     ) = uuidList.forEach { uuid ->
         if (uuid in uuidToAddress) {
             putRequest(uuid, port, path, body)
@@ -102,10 +89,7 @@ object Client {
     }
 
     suspend fun <T> broadcastDeleteRequest(
-        uuidList: List<String> = uuidToAddress.keys.toList(),
-        port: Int = 8080,
-        path: String,
-        body: T
+        uuidList: List<String> = uuidToAddress.keys.toList(), port: Int = 8080, path: String, body: T
     ) = uuidList.forEach { uuid ->
         if (uuid in uuidToAddress) {
             deleteRequest(uuid, port, path, body)
