@@ -115,16 +115,16 @@ class GroupSchema(database: Database) {
         }
     }
 
-    suspend fun addUserGroup(user: User, group: Group) = dbQuery {
+    suspend fun addUserGroup(userID: String, group: Group) = dbQuery {
         UserGroup.insert {
-            it[userUUID] = user.id
+            it[userUUID] = userID
             it[groupUUID] = group.id
         }[Groups.groupUUID]
     }
 
-    suspend fun deleteUserGroup(user: User, group: Group) = dbQuery {
+    suspend fun deleteUserGroup(userID: String, group: Group) = dbQuery {
         UserGroup.deleteWhere {
-            userUUID eq user.id
+            userUUID eq userID
             groupUUID eq group.id
         }
     }
