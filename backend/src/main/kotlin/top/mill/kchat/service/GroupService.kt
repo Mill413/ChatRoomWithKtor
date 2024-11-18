@@ -26,6 +26,11 @@ class GroupService {
         } else throw KChatException("Group ${group.id} already exists", logger)
     }
 
+    suspend fun queryGroupByUUID(uuid: String) = GroupSchema(DatabaseManager.getDatabase()).getGroupByUUID(uuid)
+
+    suspend fun queryGroupByName(groupName: String) =
+        GroupSchema(DatabaseManager.getDatabase()).getGroupsByName(groupName)
+
     suspend fun joinGroup(group: Group, user: User): String {
         logger.info { "User ${user.name} joining Group ${group.name}" }
 
