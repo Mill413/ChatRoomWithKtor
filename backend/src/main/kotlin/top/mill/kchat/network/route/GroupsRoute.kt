@@ -1,4 +1,4 @@
-package top.mill.kchat.network
+package top.mill.kchat.network.route
 
 import io.ktor.server.routing.*
 import top.mill.kchat.service.GroupService
