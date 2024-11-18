@@ -1,4 +1,4 @@
-package top.mill.kchat.network
+package top.mill.kchat.network.route
 
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*

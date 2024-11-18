@@ -1,4 +1,4 @@
-package top.mill.kchat.network
+package top.mill.kchat.network.route
 
 import io.ktor.http.*
 import io.ktor.server.plugins.*
@@ -9,12 +9,13 @@ import io.ktor.server.routing.*
 import top.mill.kchat.contacts.User
 import top.mill.kchat.exceptions.KChatException
 import top.mill.kchat.logger
+import top.mill.kchat.network.Client
 import top.mill.kchat.service.UserService
 import java.net.InetAddress
 
 fun Route.usersRoute() {
     val service = UserService()
-    val logger = logger("UserService")
+    val logger = logger("Service")
     route("/user") {
         get("/query") {
             val uuid = call.parameters["id"]

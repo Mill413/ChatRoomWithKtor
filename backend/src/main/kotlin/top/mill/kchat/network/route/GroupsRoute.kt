@@ -1,10 +1,12 @@
-package top.mill.kchat.network
+package top.mill.kchat.network.route
 
 import io.ktor.server.routing.*
+import top.mill.kchat.logger
 import top.mill.kchat.service.GroupService
 
 fun Route.groupsRoute() {
     val service = GroupService()
+    val logger = logger("Service")
     route("/group") {
         get("/query") {
             TODO("Get group by parameters id and name")
