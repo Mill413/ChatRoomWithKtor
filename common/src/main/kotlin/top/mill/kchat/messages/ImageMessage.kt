@@ -14,14 +14,13 @@ data class ImageMessage(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
+        val otherImage = other as ImageMessage
 
-        other as ImageMessage
-
-        if (sendTime != other.sendTime) return false
-        if (!image.contentEquals(other.image)) return false
-        if (imageName != other.imageName) return false
-        if (sender != other.sender) return false
-        if (receiver != other.receiver) return false
+        if (sendTime != otherImage.sendTime) return false
+        if (!image.contentEquals(otherImage.image)) return false
+        if (imageName != otherImage.imageName) return false
+        if (sender != otherImage.sender) return false
+        if (receiver != otherImage.receiver) return false
 
         return true
     }
