@@ -13,7 +13,7 @@ import top.mill.kchat.network.Client
 import top.mill.kchat.service.UserService
 import java.net.InetAddress
 
-fun Route.usersRoute() {
+fun Route.userRoute() {
     val service = UserService()
     val logger = logger("UserService")
     route("/user") {

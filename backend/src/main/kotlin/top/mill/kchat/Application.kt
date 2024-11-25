@@ -11,8 +11,8 @@ import top.mill.kchat.network.Client
 import top.mill.kchat.network.broadcastDiscoveryMessage
 import top.mill.kchat.network.listenForResponses
 import top.mill.kchat.network.route.chatRoute
-import top.mill.kchat.network.route.groupsRoute
-import top.mill.kchat.network.route.usersRoute
+import top.mill.kchat.network.route.groupRoute
+import top.mill.kchat.network.route.userRoute
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(DelicateCoroutinesApi::class)
@@ -65,7 +65,7 @@ fun Application.configureSockets() {
     }
     routing {
         chatRoute()
-        usersRoute()
-        groupsRoute()
+        userRoute()
+        groupRoute()
     }
 }
