@@ -2,11 +2,11 @@ package top.mill.kchat.service
 
 import top.mill.kchat.UUIDManager
 import top.mill.kchat.contacts.Group
-import top.mill.kchat.database.DatabaseManager
-import top.mill.kchat.database.GroupSchema
 import top.mill.kchat.exceptions.KChatException
 import top.mill.kchat.logger
 import top.mill.kchat.network.Client
+import top.mill.kchat.storage.DatabaseManager
+import top.mill.kchat.storage.GroupSchema
 
 class GroupService {
     private val logger = logger("Application")

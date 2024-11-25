@@ -1,4 +1,4 @@
-package top.mill.kchat.database
+package top.mill.kchat.storage
 
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.*
