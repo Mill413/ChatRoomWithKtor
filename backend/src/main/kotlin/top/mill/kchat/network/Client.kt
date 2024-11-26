@@ -5,7 +5,9 @@ import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
+import io.ktor.websocket.*
 import kotlinx.serialization.json.Json
+import top.mill.kchat.exceptions.KChatException
 import top.mill.kchat.logger
 import java.net.InetAddress
 
@@ -16,32 +18,47 @@ object Client {
         install(WebSockets)
     }
 
-    private val deviceAddressList = mutableSetOf<InetAddress>()
-
+    private val deviceInNet = mutableListOf<InetAddress>()
     private val uuidToAddress = mutableMapOf<String, InetAddress>()
+    private val uuidToSession = mutableMapOf<String, WebSocketSession>()
 
     init {
         logger.info { "LocalHost Address: ${InetAddress.getLocalHost().hostAddress}" }
     }
 
-    fun onlineCount(): Int = deviceAddressList.size
+    fun onlineCount() = uuidToSession.size
 
-    fun addNewAddress(ip: InetAddress) = deviceAddressList.add(ip)
+    fun addNewAddress(ip: InetAddress) {
+        deviceInNet.add(ip)
+    }
+
+    fun deleteAddress(ip: InetAddress) {
+        deviceInNet.remove(ip)
+    }
 
     fun updateUUID(uuid: String, ip: InetAddress) {
         uuidToAddress[uuid] = ip
     }
 
-    fun deleteAddress(ip: InetAddress) = deviceAddressList.remove(ip)
-
-//    fun getAddressByUUID(uuid: String): InetAddress? {}
-//        uuidToAddress.entries.filter { it.value == uuid }.map { it.key }.singleOrNull()
-
-    fun sendMessageOnWebSocket(message: String, uuid: String) {
-        TODO("Send Text Message to certain IP via WebSocket")
+    suspend fun createSession(uuid: String, ip: InetAddress) {
+        uuidToSession.getOrPut(uuid) {
+            client.webSocketSession(
+                host = ip.hostAddress,
+                port = 8080,
+                path = "/chat"
+            )
+        }
     }
 
-    fun broadcastMessageOnWebSocket(message: String, uuidList: List<String> = uuidToAddress.keys.toList()) =
+    suspend fun sendMessageOnWebSocket(message: String, uuid: String) {
+        val session = uuidToSession[uuid]
+        if (session == null) {
+            throw KChatException("No session found for uuid: $uuid", logger)
+        }
+        session.send(message)
+    }
+
+    suspend fun broadcastMessageOnWebSocket(message: String, uuidList: List<String> = uuidToAddress.keys.toList()) =
         uuidList.forEach { uuid ->
             if (uuid in uuidToAddress) sendMessageOnWebSocket(message, uuid)
         }
