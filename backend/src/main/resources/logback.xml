@@ -3,9 +3,23 @@
         <encoder>
             <pattern>[%d{YYYY-MM-dd HH:mm:ss.SSS}] %highlight(%-5level %-15logger: %msg%n)</pattern>
         </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
     </appender>
-    <root level="info">
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>./kchat.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>[%d{YYYY-MM-dd HH:mm:ss.SSS}] %highlight(%-5level %-15logger: %msg%n)</pattern>
+        </encoder>
+    </appender>
+
+    <root level="debug">
         <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </root>
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="io.netty" level="INFO"/>

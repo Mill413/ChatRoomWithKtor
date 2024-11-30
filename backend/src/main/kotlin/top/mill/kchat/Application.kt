@@ -15,35 +15,42 @@ import top.mill.kchat.network.route.groupRoute
 import top.mill.kchat.network.route.userRoute
 import kotlin.time.Duration.Companion.seconds
 
-@OptIn(DelicateCoroutinesApi::class)
-fun main(args: Array<String>) = runBlocking {
+class Backend {
 
-    logger().info { "Application started." }
+    private val logger = logger("Backend")
 
-    val ktorJob = GlobalScope.launch { EngineMain.main(args) }
+    @OptIn(DelicateCoroutinesApi::class)
+    fun start(args: Array<String>): Unit = runBlocking {
 
-    val broadcastJob = launch(Dispatchers.Default) {
-        while (true) {
-            broadcastDiscoveryMessage()
-            delay(BROADCAST_DELAY)
+        logger.info { "Application started." }
+
+        val ktorJob = GlobalScope.launch { EngineMain.main(args) }
+
+        val broadcastJob = launch(Dispatchers.Default) {
+            while (true) {
+                broadcastDiscoveryMessage()
+                delay(BROADCAST_DELAY)
+            }
         }
-    }
 
-    val listenJob = launch(Dispatchers.Default) {
-        listenForResponses { userAddress ->
-            logger().info { "Discovered user at $userAddress" }
-            Client.addNewAddress(userAddress)
+        val listenJob = launch(Dispatchers.Default) {
+            listenForResponses { userAddress ->
+                Client.addNewAddress(userAddress)
+            }
         }
+
+        broadcastJob.join()
+        listenJob.join()
+        ktorJob.join()
+
+        ConfigManager.saveConfig()
+
+        logger.info { "Application stopped." }
     }
-
-    broadcastJob.join()
-    listenJob.join()
-    ktorJob.join()
-
-    ConfigManager.saveConfig()
-
-    logger().info { "Application stopped." }
 }
+
+//@OptIn(DelicateCoroutinesApi::class)
+//fun main(args: Array<String>) = Backend().start(args)
 
 fun Application.module() {
     configureSerialization()
