@@ -6,6 +6,7 @@ import io.ktor.server.request.*
 import io.ktor.server.request.ContentTransformationException
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.coroutines.delay
 import top.mill.kchat.contacts.User
 import top.mill.kchat.exceptions.KChatException
 import top.mill.kchat.logger
@@ -39,7 +40,7 @@ fun Route.userRoute() {
                     }
                 }
 
-                else         -> {
+                else -> {
                     call.respondText(text = "Parameter id or name is required", status = HttpStatusCode.BadRequest)
                 }
             }
@@ -52,7 +53,7 @@ fun Route.userRoute() {
                 logger.info { "Received from $remoteAddress: $user" }
 
                 val uuid = service.createUser(user)
-                Client.updateUUID(uuid, InetAddress.getByName(remoteAddress))
+                Client.updateAddressByUUID(uuid, InetAddress.getByName(remoteAddress))
                 call.respondText(
                     text = "User $uuid from $remoteAddress created",
                     status = HttpStatusCode.Companion.Created
@@ -83,6 +84,9 @@ fun Route.userRoute() {
             val user = call.receive<User>()
             try {
                 service.login(user)
+                val host = call.request.local.remoteHost
+                delay(500)
+                Client.createDeviceSessionFromClient(user.id, host)
                 call.respond(HttpStatusCode.OK, "User ${user.name} logged in")
             } catch (e: Exception) {
                 if (e !is KChatException) {

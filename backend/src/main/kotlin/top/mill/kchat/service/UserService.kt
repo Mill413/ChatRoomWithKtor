@@ -1,13 +1,11 @@
 package top.mill.kchat.service
 
 import top.mill.kchat.UUIDManager
-import top.mill.kchat.contacts.Contact
 import top.mill.kchat.contacts.User
 import top.mill.kchat.contacts.UserStatus
 import top.mill.kchat.exceptions.KChatException
 import top.mill.kchat.localStatus
 import top.mill.kchat.logger
-import top.mill.kchat.messages.Message
 import top.mill.kchat.network.Client
 import top.mill.kchat.storage.DatabaseManager
 import top.mill.kchat.storage.UserSchema
@@ -80,10 +78,6 @@ class UserService {
         if (userSchema.getUserByUUID(uuid) != null) {
             return userSchema.delete(uuid)
         } else throw KChatException("User $uuid does not exist.", logger)
-    }
-
-    fun sendMessage(from: User, to: Contact, message: Message) {
-        TODO("Send Message from a user to other user or a Chatroom")
     }
 
     private inline fun onLocalUser(uuid: String, block: () -> Unit) {

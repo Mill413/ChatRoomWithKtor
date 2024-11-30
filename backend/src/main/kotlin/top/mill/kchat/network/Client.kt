@@ -5,10 +5,12 @@ import io.ktor.client.call.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
-import io.ktor.websocket.*
+import kotlinx.coroutines.channels.Channel
 import kotlinx.serialization.json.Json
+import top.mill.kchat.UUIDManager
 import top.mill.kchat.exceptions.KChatException
 import top.mill.kchat.logger
+import top.mill.kchat.messages.Message
 import java.net.InetAddress
 
 object Client {
@@ -20,7 +22,9 @@ object Client {
 
     private val deviceInNet = mutableListOf<InetAddress>()
     private val uuidToAddress = mutableMapOf<String, InetAddress>()
-    private val uuidToSession = mutableMapOf<String, WebSocketSession>()
+    private val uuidToSession = mutableMapOf<String, DeviceSession>()
+
+    private val messageChannel = Channel<Message>()
 
     init {
         logger.info { "LocalHost Address: ${InetAddress.getLocalHost().hostAddress}" }
@@ -36,18 +40,30 @@ object Client {
         deviceInNet.remove(ip)
     }
 
-    fun updateUUID(uuid: String, ip: InetAddress) {
+    fun updateAddressByUUID(uuid: String, ip: InetAddress) {
         uuidToAddress[uuid] = ip
     }
 
-    suspend fun createSession(uuid: String, ip: InetAddress) {
-        uuidToSession.getOrPut(uuid) {
-            client.webSocketSession(
-                host = ip.hostAddress,
-                port = 8080,
-                path = "/chat"
-            )
+    suspend fun createDeviceSessionFromClient(
+        id: String,
+        host: String,
+        port: Int = 8848,
+        path: String = "/chat"
+    ): DeviceSession {
+        val client = HttpClient(CIO) {
+            install(WebSockets)
         }
+        val session = client.webSocketSession(host = host, port = port, path = path) {
+            url {
+                parameters.append("uuid", UUIDManager.getUUIDString())
+            }
+        }
+        logger().info { "Create Client Session to $id" }
+        return DeviceSession(id, session)
+    }
+
+    fun addSession(session: DeviceSession) {
+        uuidToSession[session.id] = session
     }
 
     suspend fun sendMessageOnWebSocket(message: String, uuid: String) {
@@ -62,6 +78,12 @@ object Client {
         uuidList.forEach { uuid ->
             if (uuid in uuidToAddress) sendMessageOnWebSocket(message, uuid)
         }
+
+    suspend fun receiveMessageOnWebSocket(uuid: String, onReceive: (Message) -> Unit) {
+        uuidToSession[uuid]?.let { session ->
+            onReceive(session.receive())
+        }
+    }
 
     internal suspend inline fun <reified T> getRequest(
         uuid: String, port: Int = 8080, path: String, params: Map<String, String>
@@ -112,6 +134,10 @@ object Client {
             deleteRequest(uuid, port, path, body)
         }
     }
+
+    suspend fun appendMessage(message: Message) = messageChannel.send(message)
+
+    suspend fun fetchMessage(message: Message) = messageChannel.receive()
 }
 
 
