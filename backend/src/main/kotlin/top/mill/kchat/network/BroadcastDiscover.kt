@@ -6,8 +6,9 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 
-private val logger = logger("Network")
+private val logger = logger("Network.Discover")
 
+// TODO(Check ip is Active in Net)
 fun broadcastDiscoveryMessage() {
     if (localStatus == UserStatus.ONLINE) {
         DatagramSocket().use { socket ->
@@ -15,7 +16,7 @@ fun broadcastDiscoveryMessage() {
             val data = BROADCAST_MESSAGE.toByteArray()
             val packet = DatagramPacket(data, data.size, InetAddress.getByName("255.255.255.255"), BROADCAST_PORT)
             socket.send(packet)
-            logger.info { "Send Broadcast message: $BROADCAST_MESSAGE To Port: $BROADCAST_PORT" }
+            logger.trace { "Send Broadcast message: $BROADCAST_MESSAGE To Port: $BROADCAST_PORT" }
         }
     }
 }
@@ -30,7 +31,7 @@ fun listenForResponses(onUserDiscovered: (InetAddress) -> Unit) {
         val receivedMessage = String(packet.data, 0, packet.length)
 
         if (packet.address.hostAddress == InetAddress.getLocalHost().hostAddress) continue
-        logger.info { "Received: $receivedMessage From Address: ${packet.address.hostAddress}" }
+        logger.trace { "Received: $receivedMessage From Address: ${packet.address.hostAddress}" }
         if (localStatus == UserStatus.ONLINE) {
             if (receivedMessage == BROADCAST_MESSAGE) {
                 respondToDiscovery(packet.address)
@@ -42,7 +43,7 @@ fun listenForResponses(onUserDiscovered: (InetAddress) -> Unit) {
 }
 
 fun respondToDiscovery(address: InetAddress) {
-    logger.info { "Respond to discovery: $address" }
+    logger.debug { "Respond to discovery: $address" }
     DatagramSocket().use { socket ->
         val responseData = RESPONSE_MESSAGE.toByteArray()
         val responsePacket = DatagramPacket(responseData, responseData.size, address, BROADCAST_PORT)

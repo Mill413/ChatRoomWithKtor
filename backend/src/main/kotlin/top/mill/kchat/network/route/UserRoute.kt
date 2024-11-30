@@ -14,9 +14,11 @@ import top.mill.kchat.network.Client
 import top.mill.kchat.service.UserService
 import java.net.InetAddress
 
+// TODO(Redesign API)
 fun Route.userRoute() {
     val service = UserService()
-    val logger = logger("UserService")
+    val logger = logger("UserRoute")
+    logger.info { "Listening to UserRoute" }
     route("/user") {
         get("/query") {
             val uuid = call.parameters["id"]
@@ -47,6 +49,7 @@ fun Route.userRoute() {
         }
 
         post {
+            logger.info { "here" }
             try {
                 val user = call.receive<User>()
                 val remoteAddress = call.request.origin.remoteHost

@@ -11,7 +11,7 @@ import top.mill.kchat.storage.DatabaseManager
 import top.mill.kchat.storage.UserSchema
 
 class UserService {
-    private val logger = logger("Application")
+    private val logger = logger("UserService")
     private val localUUID = UUIDManager.getUUIDString()
 
     suspend fun createUser(user: User): String {
@@ -29,11 +29,12 @@ class UserService {
 
     suspend fun login(user: User): Int {
         logger.info { "User ${user.name} logged in." }
+        val userSchema = UserSchema(DatabaseManager.getDatabase())
         onLocalUser(user.id) {
             Client.broadcastPutRequest(path = "user/login", body = user)
             localStatus = UserStatus.ONLINE
+//            userSchema.createUser(user)
         }
-        val userSchema = UserSchema(DatabaseManager.getDatabase())
         if (userSchema.getUserByUUID(user.id) != null) {
             return userSchema.updateUserLoginTime(user.id)
         } else throw KChatException("User ${user.name} does not exist.", logger)

@@ -16,7 +16,7 @@ import java.net.InetAddress
 object Client {
     private val logger = logger("Client")
 
-    private val client = HttpClient(CIO) {
+    val client = HttpClient(CIO) {
         install(WebSockets)
     }
 
@@ -33,7 +33,10 @@ object Client {
     fun onlineCount() = uuidToSession.size
 
     fun addNewAddress(ip: InetAddress) {
-        deviceInNet.add(ip)
+        if (ip !in deviceInNet) {
+            logger.info { "Discovered user at $ip" }
+            deviceInNet.add(ip)
+        }
     }
 
     fun deleteAddress(ip: InetAddress) {
@@ -45,10 +48,7 @@ object Client {
     }
 
     suspend fun createDeviceSessionFromClient(
-        id: String,
-        host: String,
-        port: Int = 8848,
-        path: String = "/chat"
+        id: String, host: String, port: Int = 8848, path: String = "/chat"
     ): DeviceSession {
         val client = HttpClient(CIO) {
             install(WebSockets)
@@ -86,58 +86,55 @@ object Client {
     }
 
     internal suspend inline fun <reified T> getRequest(
-        uuid: String, port: Int = 8080, path: String, params: Map<String, String>
+        uuid: String, port: Int = 8848, path: String, params: Map<String, String>
     ): T = client.get("${uuidToAddress[uuid]}:$port/$path") {
         url {
             params.forEach { k, v -> parameters.append(k, v) }
         }
     }.let { response -> Json.decodeFromString(response.body()) }
 
-    suspend fun <T> postRequest(uuid: String, port: Int = 8080, path: String, body: T) =
-        client.post("${uuidToAddress[uuid]}:$port/$path") { body }
+    internal suspend inline fun <reified T> postRequest(uuid: String, port: Int = 8848, path: String, body: T) =
+        client.post("${uuidToAddress[uuid]}:$port/$path") { setBody(body) }
 
-    suspend fun <T> putRequest(uuid: String, port: Int = 8080, path: String, body: T) =
-        client.put("${uuidToAddress[uuid]}:$port/$path") { body }
+    internal suspend inline fun <reified T> putRequest(uuid: String, port: Int = 8848, path: String, body: T) =
+        client.put("${uuidToAddress[uuid]}:$port/$path") { setBody(body) }
 
-    suspend fun <T> deleteRequest(uuid: String, port: Int = 8080, path: String, body: T) =
-        client.delete("${uuidToAddress[uuid]}:$port/$path") { body }
+    internal suspend inline fun <reified T> deleteRequest(uuid: String, port: Int = 8848, path: String, body: T) =
+        client.delete("${uuidToAddress[uuid]}:$port/$path") { setBody(body) }
 
     internal suspend inline fun <reified T> broadcastGetRequest(
         uuidList: List<String> = uuidToAddress.keys.toList(),
-        port: Int = 8080,
+        port: Int = 8848,
         path: String,
         params: Map<String, String>
     ): List<T> = uuidList.mapNotNull { uuid ->
         uuid.takeIf { it in uuidToAddress }?.let { getRequest(it, port, path, params) }
     }
 
-    suspend fun <T> broadcastPostRequest(
-        uuidList: List<String> = uuidToAddress.keys.toList(), port: Int = 8080, path: String, body: T
+    internal suspend inline fun <reified T> broadcastPostRequest(
+        uuidList: List<String> = uuidToAddress.keys.toList(), port: Int = 8848, path: String, body: T
     ) = uuidList.forEach { uuid ->
         if (uuid in uuidToAddress) {
             postRequest(uuid, port, path, body)
         }
     }
 
-    suspend fun <T> broadcastPutRequest(
-        uuidList: List<String> = uuidToAddress.keys.toList(), port: Int = 8080, path: String, body: T
+    internal suspend inline fun <reified T> broadcastPutRequest(
+        uuidList: List<String> = uuidToAddress.keys.toList(), port: Int = 8848, path: String, body: T
     ) = uuidList.forEach { uuid ->
         if (uuid in uuidToAddress) {
             putRequest(uuid, port, path, body)
         }
     }
 
-    suspend fun <T> broadcastDeleteRequest(
-        uuidList: List<String> = uuidToAddress.keys.toList(), port: Int = 8080, path: String, body: T
+    internal suspend inline fun <reified T> broadcastDeleteRequest(
+        uuidList: List<String> = uuidToAddress.keys.toList(), port: Int = 8848, path: String, body: T
     ) = uuidList.forEach { uuid ->
         if (uuid in uuidToAddress) {
             deleteRequest(uuid, port, path, body)
         }
     }
 
-    suspend fun appendMessage(messageList: MessageList) = messageListChannel.send(messageList)
-
-    suspend fun fetchMessage(messageList: MessageList) = messageListChannel.receive()
 }
 
 
