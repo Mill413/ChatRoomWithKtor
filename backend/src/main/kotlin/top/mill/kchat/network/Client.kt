@@ -10,7 +10,7 @@ import kotlinx.serialization.json.Json
 import top.mill.kchat.UUIDManager
 import top.mill.kchat.exceptions.KChatException
 import top.mill.kchat.logger
-import top.mill.kchat.messages.Message
+import top.mill.kchat.messages.MessageList
 import java.net.InetAddress
 
 object Client {
@@ -24,7 +24,7 @@ object Client {
     private val uuidToAddress = mutableMapOf<String, InetAddress>()
     private val uuidToSession = mutableMapOf<String, DeviceSession>()
 
-    private val messageChannel = Channel<Message>()
+    private val messageListChannel = Channel<MessageList>()
 
     init {
         logger.info { "LocalHost Address: ${InetAddress.getLocalHost().hostAddress}" }
@@ -79,7 +79,7 @@ object Client {
             if (uuid in uuidToAddress) sendMessageOnWebSocket(message, uuid)
         }
 
-    suspend fun receiveMessageOnWebSocket(uuid: String, onReceive: (Message) -> Unit) {
+    suspend fun receiveMessageOnWebSocket(uuid: String, onReceive: (MessageList) -> Unit) {
         uuidToSession[uuid]?.let { session ->
             onReceive(session.receive())
         }
@@ -135,9 +135,9 @@ object Client {
         }
     }
 
-    suspend fun appendMessage(message: Message) = messageChannel.send(message)
+    suspend fun appendMessage(messageList: MessageList) = messageListChannel.send(messageList)
 
-    suspend fun fetchMessage(message: Message) = messageChannel.receive()
+    suspend fun fetchMessage(messageList: MessageList) = messageListChannel.receive()
 }
 
 

@@ -10,7 +10,7 @@ data class ImageMessage(
     override val receiver: String,
     override val sendTime: Long,
     override val type: MessageType = MessageType.IMAGE
-) : MetaMessage() {
+) : Message() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

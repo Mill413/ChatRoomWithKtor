@@ -7,4 +7,4 @@ data class EmojiMessage(
     override val receiver: String,
     override val sendTime: Long,
     override val type: MessageType = MessageType.EMOJI
-) : MetaMessage()
+) : Message()

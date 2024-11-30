@@ -9,4 +9,4 @@ data class TextMessage(
     override val receiver: String,
     override val sendTime: Long,
     override val type: MessageType = MessageType.TEXT
-) : MetaMessage()
+) : Message()
