@@ -8,5 +8,5 @@ data class TextMessage(
     override val sender: String,
     override val receiver: String,
     override val sendTime: Long,
-    override val type: MessageType = MessageType.IMAGE
+    override val type: MessageType = MessageType.TEXT
 ) : MetaMessage()

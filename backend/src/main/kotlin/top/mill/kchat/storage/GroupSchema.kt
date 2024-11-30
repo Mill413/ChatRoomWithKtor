@@ -71,6 +71,30 @@ class GroupSchema(database: Database) {
         }
     }
 
+    suspend fun deleteGroupByUUID(uuid: String) = dbQuery {
+        Groups.deleteWhere { groupUUID eq uuid }
+    }
+
+    suspend fun updateGroupName(uuid: String, newGroup: Group) = dbQuery {
+        Groups.update({ Groups.groupUUID eq uuid }) {
+            it[groupName] = newGroup.name
+        }
+    }
+
+    suspend fun addUserGroup(userID: String, group: Group) = dbQuery {
+        UserGroup.insert {
+            it[userUUID] = userID
+            it[groupUUID] = group.id
+        }[Groups.groupUUID]
+    }
+
+    suspend fun deleteUserGroup(userID: String, group: Group) = dbQuery {
+        UserGroup.deleteWhere {
+            userUUID eq userID
+            groupUUID eq group.id
+        }
+    }
+
     suspend fun getUsersByGroup(group: Group) = dbQuery {
         (Groups innerJoin UserGroup)
             .select(
@@ -104,31 +128,6 @@ class GroupSchema(database: Database) {
                 )
             }
     }
-
-    suspend fun deleteGroupByUUID(uuid: String) = dbQuery {
-        Groups.deleteWhere { groupUUID eq uuid }
-    }
-
-    suspend fun updateGroupName(uuid: String, newGroup: Group) = dbQuery {
-        Groups.update({ Groups.groupUUID eq uuid }) {
-            it[groupName] = newGroup.name
-        }
-    }
-
-    suspend fun addUserGroup(userID: String, group: Group) = dbQuery {
-        UserGroup.insert {
-            it[userUUID] = userID
-            it[groupUUID] = group.id
-        }[Groups.groupUUID]
-    }
-
-    suspend fun deleteUserGroup(userID: String, group: Group) = dbQuery {
-        UserGroup.deleteWhere {
-            userUUID eq userID
-            groupUUID eq group.id
-        }
-    }
-
     private suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
 }

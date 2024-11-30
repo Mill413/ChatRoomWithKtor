@@ -37,7 +37,7 @@ fun Route.groupRoute() {
                     }
                 }
 
-                else         -> {
+                else -> {
                     call.respondText(text = "Parameter id or name is required", status = HttpStatusCode.BadRequest)
                 }
             }
