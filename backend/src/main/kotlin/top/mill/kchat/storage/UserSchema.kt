@@ -14,7 +14,7 @@ class UserSchema(database: Database) {
     object Users : Table("users") {
         val userID = text("user_id")
         val userName = text("user_name")
-        val commentName = text("comment_name").default(userName.toString())
+        val commentName = text("comment_name").default("")
         val userCreateTime = long("user_create_time").default(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
         val lastLoginTime = long("last_login_time")
         val userStatus = text("user_status")
@@ -35,6 +35,7 @@ class UserSchema(database: Database) {
             it[userCreateTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
             it[lastLoginTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
             it[userStatus] = user.status.toString()
+            it[commentName] = user.name
         }[Users.userID]
     }
 
