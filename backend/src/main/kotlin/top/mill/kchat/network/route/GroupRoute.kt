@@ -11,6 +11,7 @@ import top.mill.kchat.exceptions.KChatException
 import top.mill.kchat.logger
 import top.mill.kchat.service.GroupService
 
+// TODO(Redesign API)
 fun Route.groupRoute() {
     val service = GroupService()
     val logger = logger("Service")

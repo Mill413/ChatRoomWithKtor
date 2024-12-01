@@ -10,6 +10,7 @@ import top.mill.kchat.network.Client
 import top.mill.kchat.storage.DatabaseManager
 import top.mill.kchat.storage.UserSchema
 
+// TODO(Redesign methods)
 class UserService {
     private val logger = logger("UserService")
     private val localUUID = UUIDManager.getUUIDString()
@@ -23,7 +24,7 @@ class UserService {
 
         val userSchema = UserSchema(DatabaseManager.getDatabase())
         if (userSchema.getUserByUUID(user.id) == null) {
-            return userSchema.createUser(user)
+            return userSchema.addUser(user)
         } else throw KChatException("User ${user.name} already exists.", logger)
     }
 
@@ -77,7 +78,7 @@ class UserService {
         }
         val userSchema = UserSchema(DatabaseManager.getDatabase())
         if (userSchema.getUserByUUID(uuid) != null) {
-            return userSchema.delete(uuid)
+            return userSchema.deleteUser(uuid)
         } else throw KChatException("User $uuid does not exist.", logger)
     }
 

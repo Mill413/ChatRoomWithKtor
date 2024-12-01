@@ -8,6 +8,7 @@ import top.mill.kchat.network.Client
 import top.mill.kchat.storage.DatabaseManager
 import top.mill.kchat.storage.GroupSchema
 
+// TODO(Redesign methods)
 class GroupService {
     private val logger = logger("Application")
     private val localUUID = UUIDManager.getUUIDString()
@@ -21,7 +22,7 @@ class GroupService {
 
         val groupSchema = GroupSchema(DatabaseManager.getDatabase())
         if (groupSchema.getGroupByUUID(group.id) == null) {
-            return groupSchema.createGroup(group)
+            return groupSchema.addGroup(group)
         } else throw KChatException("Group ${group.id} already exists", logger)
     }
 

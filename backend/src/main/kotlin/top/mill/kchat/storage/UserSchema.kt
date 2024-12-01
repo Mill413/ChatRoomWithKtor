@@ -10,16 +10,17 @@ import top.mill.kchat.contacts.UserStatus
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
+// TODO(Redesign methods)
 class UserSchema(database: Database) {
     object Users : Table("users") {
-        val userID = text("user_id")
+        val userUUID = text("user_id")
         val userName = text("user_name")
         val commentName = text("comment_name").default("")
         val userCreateTime = long("user_create_time").default(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC))
         val lastLoginTime = long("last_login_time")
         val userStatus = text("user_status")
 
-        override val primaryKey = PrimaryKey(userID)
+        override val primaryKey = PrimaryKey(userUUID)
     }
 
     init {
@@ -28,23 +29,23 @@ class UserSchema(database: Database) {
         }
     }
 
-    suspend fun createUser(user: User): String = dbQuery {
+    suspend fun addUser(user: User): String = dbQuery {
         Users.insert {
             it[userName] = user.name
-            it[userID] = user.id
+            it[userUUID] = user.id
             it[userCreateTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
             it[lastLoginTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
             it[userStatus] = user.status.toString()
             it[commentName] = user.name
-        }[Users.userID]
+        }[Users.userUUID]
     }
 
     suspend fun getUserByUUID(uuid: String): User? = dbQuery {
-        Users.selectAll().where { Users.userID eq uuid }
+        Users.selectAll().where { Users.userUUID eq uuid }
             .map {
                 User(
                     name = it[Users.userName],
-                    id = it[Users.userID],
+                    id = it[Users.userUUID],
                     status = UserStatus.OFFLINE
                 )
             }.singleOrNull()
@@ -55,33 +56,33 @@ class UserSchema(database: Database) {
             .map {
                 User(
                     name = it[Users.userName],
-                    id = it[Users.userID],
+                    id = it[Users.userUUID],
                     status = UserStatus.OFFLINE
                 )
             }
     }
 
     suspend fun updateUserName(uuid: String, user: User) = dbQuery {
-        Users.update({ Users.userID eq uuid }) {
+        Users.update({ Users.userUUID eq uuid }) {
             it[userName] = user.name
         }
     }
 
     suspend fun updateUserLoginTime(uuid: String, loginTime: Long = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)) =
         dbQuery {
-            Users.update({ Users.userID eq uuid }) {
+            Users.update({ Users.userUUID eq uuid }) {
                 it[lastLoginTime] = loginTime
             }
         }
 
     suspend fun updateUserStatus(uuid: String, status: UserStatus) = dbQuery {
-        Users.update({ Users.userID eq uuid }) {
+        Users.update({ Users.userUUID eq uuid }) {
             it[userStatus] = status.toString()
         }
     }
 
-    suspend fun delete(uuid: String) = dbQuery {
-        Users.deleteWhere { userID eq uuid }
+    suspend fun deleteUser(uuid: String) = dbQuery {
+        Users.deleteWhere { userUUID eq uuid }
     }
 
     private suspend fun <T> dbQuery(block: suspend () -> T): T =

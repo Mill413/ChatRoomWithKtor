@@ -10,6 +10,7 @@ import top.mill.kchat.contacts.User
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
+// TODO(Redesign methods)
 class GroupSchema(database: Database) {
     object Groups : Table("groups") {
         val groupName = text("group_name")
@@ -32,7 +33,7 @@ class GroupSchema(database: Database) {
         }
     }
 
-    suspend fun createGroup(group: Group) = dbQuery {
+    suspend fun addGroup(group: Group) = dbQuery {
         group.members.forEach { user ->
             UserGroup.insert {
                 it[userUUID] = user.id
@@ -44,6 +45,13 @@ class GroupSchema(database: Database) {
             it[groupUUID] = group.id
             it[groupCreatorUUID] = group.creator
             it[groupCreateTime] = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+        }[Groups.groupUUID]
+    }
+
+    suspend fun addUserGroup(userID: String, group: Group) = dbQuery {
+        UserGroup.insert {
+            it[userUUID] = userID
+            it[groupUUID] = group.id
         }[Groups.groupUUID]
     }
 
@@ -68,30 +76,6 @@ class GroupSchema(database: Database) {
                 name = it[Groups.groupName],
                 creator = it[Groups.groupCreatorUUID]
             )
-        }
-    }
-
-    suspend fun deleteGroupByUUID(uuid: String) = dbQuery {
-        Groups.deleteWhere { groupUUID eq uuid }
-    }
-
-    suspend fun updateGroupName(uuid: String, newGroup: Group) = dbQuery {
-        Groups.update({ Groups.groupUUID eq uuid }) {
-            it[groupName] = newGroup.name
-        }
-    }
-
-    suspend fun addUserGroup(userID: String, group: Group) = dbQuery {
-        UserGroup.insert {
-            it[userUUID] = userID
-            it[groupUUID] = group.id
-        }[Groups.groupUUID]
-    }
-
-    suspend fun deleteUserGroup(userID: String, group: Group) = dbQuery {
-        UserGroup.deleteWhere {
-            userUUID eq userID
-            groupUUID eq group.id
         }
     }
 
@@ -128,6 +112,24 @@ class GroupSchema(database: Database) {
                 )
             }
     }
+
+    suspend fun updateGroupName(uuid: String, newGroup: Group) = dbQuery {
+        Groups.update({ Groups.groupUUID eq uuid }) {
+            it[groupName] = newGroup.name
+        }
+    }
+
+    suspend fun deleteUserGroup(userID: String, group: Group) = dbQuery {
+        UserGroup.deleteWhere {
+            userUUID eq userID
+            groupUUID eq group.id
+        }
+    }
+
+    suspend fun deleteGroupByUUID(uuid: String) = dbQuery {
+        Groups.deleteWhere { groupUUID eq uuid }
+    }
+
     private suspend fun <T> dbQuery(block: suspend () -> T): T =
         newSuspendedTransaction(Dispatchers.IO) { block() }
 }
